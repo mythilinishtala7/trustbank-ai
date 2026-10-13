@@ -1,0 +1,82 @@
+<div class="wide">
+  <h1>Fraud network <span class="sim-badge">Simulated fraud intelligence</span></h1>
+  <p class="muted">Synthetic customers and beneficiary accounts. Connections show association, not proof of wrongdoing.</p>
+  @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
+
+  <div class="inv-grid">
+    <div>
+      @if (graph(); as g) {
+        <div class="stats">
+          <div><b>{{ g.nodes.length }}</b><span class="muted small">entities</span></div>
+          <div><b>{{ g.edges.length }}</b><span class="muted small">transfers</span></div>
+          <div><b>{{ count('FLAGGED') }}</b><span class="muted small">flagged</span></div>
+          <div><b>{{ count('WATCH') }}</b><span class="muted small">on watch</span></div>
+        </div>
+      }
+      <div class="graph-wrap">
+        <div #canvas class="graph" role="img" aria-label="Fraud network graph"></div>
+        <div class="graph-tools">
+          <button class="btn secondary inline" type="button" (click)="zoom(1.25)" aria-label="Zoom in">+</button>
+          <button class="btn secondary inline" type="button" (click)="zoom(0.8)" aria-label="Zoom out">−</button>
+          <button class="btn secondary inline" type="button" (click)="fit()">Fit</button>
+        </div>
+      </div>
+      <div class="legend" aria-label="Legend">
+        <span><i class="circle" style="border-color:#14243a;background:#fff"></i>Customer</span>
+        <span><i class="square" style="border-color:#2864e8;background:#e8efff"></i>Beneficiary</span>
+        <span><i class="square" style="border-color:#d99116;background:#fdf3dc"></i>Watch (network signals)</span>
+        <span><i class="square" style="border-color:#d92d20;background:#fdeceb"></i>Flagged (synthetic intel)</span>
+        <span>→ transfer direction</span>
+      </div>
+    </div>
+
+    <aside>
+      <section class="card" aria-live="polite">
+        @if (detail(); as d) {
+          <h2>{{ d.node.label }}</h2>
+          <p class="muted small">{{ d.node.id }} · {{ d.node.type }} · {{ d.node.riskLevel }}</p>
+          @if (d.observations.length) {
+            <h3>Observations</h3>
+            <ul class="signals">@for (o of d.observations; track o) { <li>{{ o }}</li> }</ul>
+          }
+          <h3 style="margin-top:12px">Connections</h3>
+          <ul class="signals">
+            @for (c of d.connections; track $index) {
+              <li>
+                {{ c.direction === 'in' ? '←' : '→' }} {{ c.label }} · {{ c.amount | currency: 'INR' : 'symbol' : '1.0-0' }}
+                <span class="muted small">{{ c.timestamp | date: 'd MMM, h:mm a' }}</span>
+              </li>
+            }
+          </ul>
+          <p class="muted small">{{ d.disclaimer }}</p>
+        } @else if (edge(); as e) {
+          <h2>Transfer</h2>
+          <p>{{ e.amount | currency: 'INR' : 'symbol' : '1.0-0' }} · {{ e.status }}</p>
+          <p class="muted small">{{ e.source }} → {{ e.target }}<br />{{ e.timestamp | date: 'd MMM y, h:mm a' }}</p>
+        } @else {
+          <h2>Select a node or edge</h2>
+          <p class="muted small">Tap any entity to see its evidence and transfer history.</p>
+        }
+      </section>
+
+      <section class="card">
+        <h2>AI decision log</h2>
+        @if (payments().length === 0) {
+          <p class="muted small">No payments yet. Run a scenario in the Customer app, then reload this view.</p>
+        }
+        @for (p of payments(); track p.id) {
+          <details>
+            <summary>
+              {{ p.amount | currency: 'INR' : 'symbol' : '1.0-0' }} → {{ p.beneficiary.displayName }}
+              · {{ p.assessment.level }} ({{ p.assessment.score }})
+            </summary>
+            <button class="btn secondary inline" type="button" (click)="highlight(p)">Highlight on graph</button>
+            @for (t of p.trace; track $index) {
+              <div class="trace"><div class="actor">{{ t.actor }}</div>{{ t.message }}</div>
+            }
+          </details>
+        }
+      </section>
+    </aside>
+  </div>
+</div>

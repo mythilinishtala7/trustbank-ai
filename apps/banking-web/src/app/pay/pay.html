@@ -1,0 +1,162 @@
+<div class="phone">
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  <ng-template #signalList>
+    <ul class="signals">
+      @for (s of topSignals(); track s.id) {
+        <li>
+          <b>{{ s.title }} <span class="sev" [class]="'sev ' + s.severity">{{ s.severity }}</span></b>
+          {{ s.evidence }}
+        </li>
+      }
+    </ul>
+  </ng-template>
+
+  @switch (status()) {
+    @case ('FORM') {
+      <section class="card">
+        <h1>Pay</h1>
+        <label for="recipient">UPI ID or account number</label>
+        <input id="recipient" type="text" autocomplete="off" placeholder="name@bank"
+               [ngModel]="recipient()" (ngModelChange)="recipient.set($event)" (blur)="verifyRecipient()" />
+        @if (recipientName()) { <div class="recipient-ok">✓ {{ recipientName() }}</div> }
+        @if (recipientError()) { <div class="error">{{ recipientError() }}</div> }
+
+        <label for="amount">Amount (₹)</label>
+        <input id="amount" type="number" min="1" inputmode="numeric"
+               [ngModel]="amount()" (ngModelChange)="amount.set($event)" />
+
+        <label for="note">Note (optional)</label>
+        <input id="note" type="text" maxlength="80" [ngModel]="note()" (ngModelChange)="note.set($event)" />
+
+        <button class="btn" type="button" [disabled]="busy()" (click)="submit()">
+          {{ busy() ? 'Checking payment…' : 'Review payment' }}
+        </button>
+        <a class="btn secondary" routerLink="/">Back</a>
+      </section>
+
+      <section class="card">
+        <h3>Demo scenarios</h3>
+        <p class="muted small">Tap to prefill. All recipients and data are synthetic.</p>
+        <div class="chips">
+          @for (s of scenarios(); track s.id) {
+            <button type="button" class="chip" (click)="useScenario(s)">
+              <b>{{ s.title }}</b>
+              <span>{{ s.description }}</span>
+              <span>Expected: {{ s.expectedOutcome }}</span>
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @case ('SCAM_CHECK') {
+      @if (payment(); as p) {
+        <section class="banner caution" role="status">
+          <h2>Quick safety check</h2>
+          <p>
+            Before you enter your PIN, answer two questions about this
+            {{ p.amount | currency: 'INR' : 'symbol' : '1.0-0' }} payment to {{ p.beneficiary.displayName }}.
+          </p>
+          <ng-container *ngTemplateOutlet="signalList" />
+        </section>
+        <section class="card">
+          @for (q of p.questions; track q.id) {
+            <fieldset>
+              <legend>{{ q.text }}</legend>
+              @for (o of q.options; track o.value) {
+                <label class="radio">
+                  <input type="radio" [name]="q.id" [value]="o.value"
+                         [checked]="(q.id === 'sourceOfDetails' ? source() : promise()) === o.value"
+                         (change)="q.id === 'sourceOfDetails' ? source.set($any(o.value)) : promise.set($any(o.value))" />
+                  {{ o.label }}
+                </label>
+              }
+            </fieldset>
+          }
+          <button class="btn" type="button" [disabled]="!answersReady() || busy()" (click)="submitAnswers()">Continue</button>
+          <button class="btn secondary" type="button" (click)="cancel()">Cancel payment</button>
+        </section>
+      }
+    }
+
+    @case ('REVIEW') {
+      @if (payment(); as p) {
+        <section class="banner caution" role="alert">
+          <h2>{{ p.explanation.headline }}</h2>
+          <p>{{ p.explanation.summary }}</p>
+          <ng-container *ngTemplateOutlet="signalList" />
+        </section>
+        <section class="card">
+          <p class="muted small">If someone you don’t know asked you to send this, stop and verify with them using a number you already trust.</p>
+          <button class="btn secondary" type="button" (click)="continuePayment()" [disabled]="busy()">I understand, continue to PIN</button>
+          <button class="btn" type="button" (click)="cancel()">Cancel payment</button>
+        </section>
+      }
+    }
+
+    @case ('HOLD') {
+      @if (payment(); as p) {
+        <section class="banner high" role="alert">
+          <h2>{{ p.explanation.headline }}</h2>
+          <p>{{ p.explanation.summary }}</p>
+          <ng-container *ngTemplateOutlet="signalList" />
+        </section>
+        <section class="card">
+          <h3>Cooling-off period</h3>
+          <div class="countdown" aria-live="polite">{{ countdown() }}</div>
+          <p class="muted small">
+            Scammers create urgency. Take a moment: contact the recipient through a number or channel you found
+            independently, and never share your PIN or OTP.
+          </p>
+          <button class="btn danger" type="button" (click)="cancel()">Cancel payment</button>
+          <button class="btn secondary" type="button" [disabled]="remaining() > 0 || busy()" (click)="continuePayment()">
+            {{ remaining() > 0 ? 'PIN locked during hold' : 'I verified independently — continue' }}
+          </button>
+          <p class="simnote">Simulated hold enforced by this demo, not by a real bank or payment network.</p>
+        </section>
+      }
+    }
+
+    @case ('READY_FOR_AUTH') {
+      @if (payment(); as p) {
+        <section class="card">
+          <h1>Confirm payment</h1>
+          <p class="muted">To {{ p.beneficiary.displayName }} · {{ p.beneficiary.handle }}</p>
+          <div style="font-size:32px;font-weight:700">{{ p.amount | currency: 'INR' : 'symbol' : '1.0-0' }}</div>
+          <label for="pin">Demo PIN (4–6 digits)</label>
+          <input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off"
+                 [ngModel]="pin()" (ngModelChange)="pin.set($event)" />
+          <p class="simnote">Demo only. Never enter a real PIN — nothing is stored or sent anywhere.</p>
+          <button class="btn" type="button" [disabled]="busy() || pin().length < 4" (click)="authorize()">Confirm (simulated)</button>
+          <button class="btn secondary" type="button" (click)="cancel()">Cancel payment</button>
+        </section>
+      }
+    }
+
+    @case ('COMPLETED') {
+      @if (payment(); as p) {
+        <section class="card receipt">
+          <h1>Payment successful (simulated)</h1>
+          <dl>
+            <dt>Paid to</dt><dd>{{ p.beneficiary.displayName }} · {{ p.beneficiary.handle }}</dd>
+            <dt>Amount</dt><dd>{{ p.amount | currency: 'INR' : 'symbol' : '1.0-0' }}</dd>
+            <dt>Reference</dt><dd>{{ p.id }}</dd>
+          </dl>
+          <button class="btn" type="button" (click)="done()">Done</button>
+          <p class="simnote">No real money moved.</p>
+        </section>
+      }
+    }
+
+    @case ('CANCELLED') {
+      <section class="card">
+        <h1>Payment cancelled</h1>
+        <p class="muted">Nothing was sent. You made a safe choice by pausing.</p>
+        <button class="btn" type="button" (click)="done()">Back to home</button>
+      </section>
+    }
+  }
+</div>
