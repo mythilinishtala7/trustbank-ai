@@ -1,5 +1,5 @@
 # Copilot instructions for TrustBank
-test 
+
 You are implementing a polished, demo-ready prototype from the OpenSpec change. Follow the specifications before writing code.
 
 ## First actions
