@@ -1,6 +1,6 @@
 # Copilot instructions for TrustBank
 
-You are implementing a polished, demo-ready prototype from the OpenSpec change. Follow the specifications before writing code.
+You are implementing a polished, demo-ready prototype from the OpenSpec change. Follow the specifications before writing code. test
 
 ## First actions
 
