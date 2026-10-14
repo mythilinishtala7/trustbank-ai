@@ -50,10 +50,14 @@ An ADK custom (non-LLM) agent that calls statistical tools over the customer's F
 An ADK custom (non-LLM) agent that runs Cypher tools through `GraphService`.
 
 #### Scenario: Evaluate recipient
-- THEN it SHALL use `account_age_days`, `recent_senders`, `pass_through`, `links_to_flagged`, and `transaction_neighborhood`
-- AND report each finding as evidence with provenance (`VERIFIED_SYNTHETIC` for stored intelligence, `INFERRED` for computed patterns)
-- AND SHALL require corroboration: a single weak indicator (for example fan-in alone) SHALL stay below the elevated threshold
-- AND established accounts (older than 90 days) SHALL NOT receive fan-in or pass-through evidence from volume alone
+- THEN it SHALL use `account_age_days`, `recent_senders`, `flow_profile`, `forwarding_chain`, and `transaction_neighborhood`
+- AND derive behavioral indicators with `INFERRED` provenance: `RAPID_PASS_THROUGH` (short median dwell and low retention), `FAN_IN_BURST` (many distinct senders in a short window), `HIGH_VELOCITY`, and `MULTI_HOP_LAYERING` (consecutive short-gap hops, ending at an account with no onward transfers)
+- AND report declared connections (`BUSINESS_SUPPLIER`, `SAME_OWNER`, `SHARED_DEVICE`) with `VERIFIED_SYNTHETIC` provenance as context
+- AND SHALL require corroboration: at least two independent behavioral indicators are needed to exceed the elevated threshold; a single indicator (for example fan-in alone) SHALL stay below it
+- AND account age SHALL be a supporting factor only, never evidence by itself
+- AND a high outflow ratio with long dwell (hours or more), a single hop, or a regular schedule SHALL NOT count as pass-through; established accounts (older than 90 days) SHALL NOT receive indicators from volume alone
+- AND detection SHALL NOT read previously derived `RiskSignal` nodes
+- AND the backend MAY persist derived indicators as `RiskSignal` nodes linked by `FLAGGED_FOR` to the supporting transactions
 
 ### Requirement: Questionnaire agent (Gemini)
 An ADK `LlmAgent` with structured output. Invoked only when the orchestrator finds elevated risk.

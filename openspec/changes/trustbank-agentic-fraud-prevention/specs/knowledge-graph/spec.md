@@ -1,8 +1,10 @@
 # Capability: Knowledge graph and synthetic scenario data
 
-Shared evidence source for the agents and the investigation console.
+Shared evidence source for the agents and the investigation console. Concrete fixture values are in `knowledge-graph-data.md`.
 
 **Storage split.** Firestore is the system of record for synthetic application data. Neo4j holds the knowledge graph, a projection of that data built by an ingestion job, and answers graph queries (Cypher). Only the backend accesses either store.
+
+**Principle.** Data only; risk is always computed. Stored data contains facts (who paid whom, how much, when, declared relationships). It never contains complaints, flags, scores, verdicts, or scenario identity. A mule is recognised by how money moves through an account, not by reports against it.
 
 ## Requirements
 
@@ -16,15 +18,15 @@ Node labels: `Customer`, `Account`, `Transaction`, `Beneficiary`, `RiskSignal`.
 | `OWNS` | Customer or Beneficiary → Account | Ownership of an account |
 | `SENT` | Account → Transaction | Source account of a transaction |
 | `PAID` | Transaction → Beneficiary | Recipient of a transaction |
-| `CONNECTED_TO` | Account ↔ Account | Declared relationship (`kind`: `SHARED_DEVICE`, `BUSINESS_SUPPLIER`) |
-| `FLAGGED_FOR` | Transaction → RiskSignal | Stored reported intelligence attached to a transaction |
+| `CONNECTED_TO` | Account ↔ Account | Declared relationship (`kind`: `SHARED_DEVICE`, `BUSINESS_SUPPLIER`, `SAME_OWNER`) |
+| `FLAGGED_FOR` | Transaction → RiskSignal | Signal derived by an agent at assessment time, supported by this transaction |
 
 #### Scenario: Stable identifiers
 - GIVEN the graph is ingested from the synthetic data
 - THEN every node SHALL have a unique deterministic `id`
 - AND ids SHALL be identical between Firestore documents and Neo4j nodes (for example `ben_novatrade`, `txn_hist_1`)
 - AND Neo4j uniqueness constraints on `id` SHALL exist for every label
-- AND every stored `CONNECTED_TO` and `FLAGGED_FOR` relationship SHALL have a `provenance`
+- AND every `CONNECTED_TO` and `FLAGGED_FOR` relationship SHALL have a `provenance`
 
 #### Scenario: Referential integrity
 - WHEN ingestion completes
@@ -32,44 +34,83 @@ Node labels: `Customer`, `Account`, `Transaction`, `Beneficiary`, `RiskSignal`.
 - AND every Transaction SHALL have exactly one `SENT` and exactly one `PAID` relationship
 
 ### Requirement: Evidence provenance
-Every stored relationship, every `RiskSignal`, and every evidence item returned by a query SHALL carry a provenance.
+Every relationship, every `RiskSignal`, and every evidence item returned by a query SHALL carry a provenance.
 
-- `VERIFIED_SYNTHETIC`: declared in the fixtures as reported intelligence (complaint-based flag, shared device, supplier relationship).
-- `INFERRED`: computed at query time from transaction behavior (fan-in burst, pass-through, multi-hop link to a reported account).
+- `VERIFIED_SYNTHETIC`: declared in the fixtures as a fact about a relationship (shared device, supplier link, same owner).
+- `INFERRED`: computed from transaction behavior at assessment time (rapid pass-through, low retention, fan-in burst, multi-hop layering, velocity).
+- `USER_PROVIDED`: from the customer's questionnaire answers.
 
-#### Scenario: No pre-assigned verdicts
-- THEN the graph and Firestore documents readable by agents SHALL NOT contain a fraud label, score, verdict, or scenario identity (shopkeeper, fraudulent, low-activity, general)
+#### Scenario: No pre-assigned verdicts or complaints
+- THEN seeded graph and Firestore data SHALL NOT contain a fraud label, score, verdict, complaint count, "reported" flag, scenario identity (shopkeeper, mule, low-activity, general), or any seeded `RiskSignal`
 - AND behavior-based findings SHALL be computed by queries at assessment time and not stored in advance
+
+#### Scenario: RiskSignals are outputs, not inputs
+- WHEN the fraud network agent derives a signal (for example `RAPID_PASS_THROUGH`, `MULTI_HOP_LAYERING`, `FAN_IN_BURST`, `HIGH_VELOCITY`)
+- THEN the backend MAY persist it as a `RiskSignal` with `INFERRED` provenance and `FLAGGED_FOR` links to the supporting transactions, for the investigation console
+- AND no detection query SHALL read `RiskSignal` nodes as evidence, so earlier assessments cannot influence later ones
 
 #### Scenario: Association is not proof
 - THEN every connection and signal SHALL be presented as evidence to investigate
 - AND no graph query SHALL return a "guilty" or "fraudulent" verdict
 
-### Requirement: Four synthetic scenarios
-Fixtures SHALL be deterministic (no randomness; timestamps relative to an injectable clock). Outcomes SHALL emerge from running the real queries and agents.
+### Requirement: Mule behavior is derived from raw transactions
+Fixtures SHALL contain raw transactions with minute-precision timestamps, sufficient for queries to compute:
 
-#### Scenario: Genuine shopkeeper (`ben_sharma_store`, "Sharma General Store")
-- GIVEN a beneficiary first seen about 700 days ago with no complaints
-- THEN the data SHALL contain about 45 completed inbound payments in the last 60 days from at least 10 distinct customers, amounts ₹80–₹1,800
-- AND about 4 weekly outbound payments of ₹25,000 to a supplier (`ben_wholesale_hub`, about 900 days old)
+- **Dwell time:** time between funds arriving in an account and leaving it, matched first-in-first-out.
+- **Retention:** share of inflow still in the account at the end of a window.
+- **Velocity:** transaction count in a window.
+- **Fan-in / fan-out:** distinct senders and distinct destinations in a window.
+- **Layering:** forwarding chains across accounts where each hop follows the previous within a short gap, ending at an account with no onward transfers.
+- **Account age:** a supporting factor only.
+
+### Requirement: Synthetic scenarios and data
+Fixtures SHALL be deterministic (no randomness; timestamps relative to an injectable clock). Outcomes SHALL emerge from running the real queries and agents. The full table (ids, amounts, timing, generator rules) is in `knowledge-graph-data.md`. Ten payment scenarios are covered:
+
+| # | Payment | Purpose |
+|---|---|---|
+| S1 | Asha → Rahul, ₹2,500 | Routine payment |
+| S2 | Asha → Sharma General Store, ₹1,200 | Genuine shopkeeper |
+| S3 | Priya → Sharma General Store, ₹400 | Low-activity payer to a shopkeeper |
+| S4 | Priya → Ananya, ₹600 | Low-activity, known recipient |
+| S5 | Asha → Green Leaf Bakery, ₹450 | Genuine new business |
+| S6 | Asha → Heritage Jewellers, ₹40,000 | Anomaly only, clean recipient |
+| S7 | Asha → Spice Garden Restaurant, ₹1,800 | High pass-through that is not a mule |
+| S8 | Asha → Nova Trade Desk, ₹25,000 | Mule network entry account |
+| S9 | Priya → Nova Trade Desk, ₹8,000 | Thin-history payer, same network |
+| S10 | Asha → Quick Returns Hub, ₹5,000 | Mule network, mid-chain account |
+
+#### Scenario: Genuine shopkeeper (`ben_sharma_store`)
+- GIVEN a beneficiary first seen about 700 days ago
+- THEN the data SHALL contain about 120 completed inbound payments over 60 days from 12 distinct customers, amounts ₹80–₹1,800, during business hours
+- AND 8 weekly outbound payments of ₹6,000 to `ben_wholesale_hub` (about 900 days old), unrelated in timing to individual inbound payments
 - AND a `VERIFIED_SYNTHETIC` `CONNECTED_TO` of kind `BUSINESS_SUPPLIER` between the two accounts
-- AND the fraud queries SHALL find nothing suspicious because the account is established and has no links to reported accounts, not because it is labelled benign
+- AND queries SHALL show long dwell (days) and about 57% retention, so nothing is flagged because of behavior, not because of a label
 
-#### Scenario: Fraudulent network (`ben_novatrade`, `ben_mule_a`, `ben_mule_b`, `ben_mule_c`)
-- THEN `ben_novatrade` SHALL be about 3 days old, with zero complaints and no stored `RiskSignal`
-- AND the three mule beneficiaries SHALL have stored `VERIFIED_SYNTHETIC` `RECIPIENT_REPORTED` signals (with complaint counts) attached via `FLAGGED_FOR` to transactions they received
-- AND at least one `VERIFIED_SYNTHETIC` `CONNECTED_TO` of kind `SHARED_DEVICE` SHALL exist between two mule accounts
-- AND the raw transfers SHALL exist so queries can detect fan-in (3 or more distinct senders into `ben_novatrade` within 72 hours), pass-through (at least 50% of inflow forwarded onward within 72 hours), and links to reported accounts
-- AND at least two independent evidence types SHALL be detectable
+#### Scenario: Mule network (`ben_novatrade`, `ben_mule_b`, `ben_mule_c`, `ben_mule_d`)
+- THEN `ben_novatrade` SHALL be about 3 days old and have no stored signal, flag, or complaint
+- AND 8 victim customers SHALL each pay `ben_novatrade`, and each amount SHALL be forwarded `ben_novatrade` → `ben_mule_b` → `ben_mule_c` → `ben_mule_d` with gaps of about 6, 4 and 5 minutes, keeping 1–2% at each hop
+- AND `ben_mule_d` SHALL have no onward transfers
+- AND no `CONNECTED_TO` relationship SHALL exist between mule accounts
+- AND at least two independent behaviors (low dwell, low retention, fan-in, layering, velocity) SHALL be detectable
+
+#### Scenario: High pass-through that is not a mule (`ben_spice_garden`)
+- THEN the account SHALL be about 500 days old with about 3 inbound payments per day for 20 days
+- AND a daily sweep at 23:00 of about 95% of that day's inbound to `ben_spice_owner`, joined by a `VERIFIED_SYNTHETIC` `SAME_OWNER` connection
+- AND dwell SHALL be hours, there SHALL be one hop only, and the schedule SHALL be regular
+
+#### Scenario: Genuine new business (`ben_greenleaf`)
+- THEN the account SHALL be about 25 days old with 8 small inbound payments, no outflow, and nothing else unusual
+
+#### Scenario: Established high-ticket merchant (`ben_heritage`)
+- THEN the account SHALL be about 600 days old with about 20 inbound payments of ₹5,000–₹60,000 and no outflow
 
 #### Scenario: Low-activity customer (`cust_priya`, "Priya Nair")
-- THEN exactly 2 completed transactions: ₹1,200 to new beneficiary `ben_ananya` about 20 days ago; ₹300 to `ben_metrocafe` about 8 days ago
-- AND no `CONNECTED_TO` or `FLAGGED_FOR` relationships
+- THEN exactly 2 completed transactions: ₹1,200 to `ben_ananya` about 20 days ago; ₹300 to `ben_metrocafe` about 8 days ago
+- AND no `CONNECTED_TO` relationships
 - AND limited history SHALL NOT be represented as a risk signal
 
 #### Scenario: General customer (`cust_asha`, "Asha Menon")
 - THEN 9 completed transactions to 4 beneficiaries (rent ₹2,500 monthly, groceries, electricity, cafe) providing the baseline (average, maximum, count, usual recipients)
-- AND no `FLAGGED_FOR` relationships on her history
 
 #### Scenario: Demo personas
 - THEN fixtures SHALL include demo personas (`cust_asha`, `cust_priya`) selectable at dummy entry; no passwords or credentials exist in the data
@@ -81,11 +122,11 @@ A fixtures-level registry SHALL list scenarios and primary entity ids for tests 
 `GraphService` SHALL provide read-only parameterized queries returning evidence with provenance:
 
 - `get_node(id)`, `neighbors(id, rel_types?)`
-- `transaction_neighborhood(txn_id)`: transaction, sender account and owner, beneficiary and account, stored signals, and `CONNECTED_TO` accounts up to 2 hops from the beneficiary account with owners. It SHALL NOT return the whole graph.
-- `recent_senders(account_id, window_hours, as_of)`
-- `pass_through(account_id, window_hours, as_of)`: inbound total, outbound total, destinations
-- `links_to_flagged(account_id, max_hops ≤ 3)`: paths to accounts with stored reported signals, with provenance per hop
+- `transaction_neighborhood(txn_id)`: transaction, sender account and owner, beneficiary and account, declared `CONNECTED_TO` accounts, and accounts reached by forwarding chains within 3 hops of the beneficiary account, with owners. It SHALL NOT return the whole graph.
 - `account_age_days(account_id, as_of)`
+- `recent_senders(account_id, window_hours, as_of)`: distinct senders, count, total
+- `flow_profile(account_id, window_hours, as_of)`: inbound count and total, outbound count and total, distinct destinations, retention ratio, median and maximum dwell (FIFO), velocity
+- `forwarding_chain(account_id, window_hours, as_of, max_hops ≤ 4, max_gap_minutes)`: onward chains where each hop follows the previous within the gap, with per-hop amount, dwell, and whether the final account has no onward transfers
 
 #### Scenario: Bounded neighborhood
 - WHEN `transaction_neighborhood` is called with a transaction id

@@ -67,10 +67,17 @@ UI and receipts SHALL state that the hold and authorization are simulated and no
 ### Requirement: Expected scenario outcomes (verified by tests, not hardcoded)
 When the real agents and policy run over the seeded data:
 
-| Payment | Expected result |
-|---|---|
-| Asha → Rahul ₹2,500 | LOW, `PROCEED`, no questions |
-| Asha → Sharma General Store ₹1,200 | LOW, `PROCEED` (high-volume established shopkeeper not flagged) |
-| Priya → Sharma General Store ₹400 | LOW, `PROCEED` (limited history not penalized) |
-| Asha → `ben_novatrade` ₹25,000, benign answers | MEDIUM, `REVIEW` |
-| Asha → `ben_novatrade` ₹25,000, messaging-app source and promised payout | HIGH, `HOLD`, 180 s |
+| # | Payment | Expected result |
+|---|---|---|
+| S1 | Asha → Rahul ₹2,500 | LOW, `PROCEED`, no questions |
+| S2 | Asha → Sharma General Store ₹1,200 | LOW, `PROCEED` (high volume, long dwell, retained) |
+| S3 | Priya → Sharma General Store ₹400 | LOW, `PROCEED` (limited history not penalized) |
+| S4 | Priya → Ananya ₹600 | LOW, `PROCEED` |
+| S5 | Asha → Green Leaf Bakery ₹450 | LOW, `PROCEED` (young account alone is not risk) |
+| S6 | Asha → Heritage Jewellers ₹40,000 | Elevated by anomaly alone; questions; `REVIEW`; never `HOLD` (no network evidence) |
+| S7 | Asha → Spice Garden Restaurant ₹1,800 | LOW, `PROCEED` (high pass-through but long dwell, single hop, regular schedule) |
+| S8 | Asha → `ben_novatrade` ₹25,000 | Elevated; benign answers → `REVIEW`; messaging-app source and promised payout → `HOLD`, 180 s |
+| S9 | Priya → `ben_novatrade` ₹8,000 | Elevated by network evidence; benign → `REVIEW`; scam answers → `HOLD` |
+| S10 | Asha → `ben_mule_b` ₹5,000 | Elevated by the account's own behavior; benign → `REVIEW`; scam answers → `HOLD` |
+
+Scenario ids and amounts are fixed by `knowledge-graph-data.md`. Outcomes are test assertions over real agent runs, never stored.

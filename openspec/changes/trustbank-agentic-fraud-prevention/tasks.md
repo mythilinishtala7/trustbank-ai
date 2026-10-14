@@ -17,8 +17,8 @@ Spec: `specs/knowledge-graph`.
 - [ ] 1.2 Create deterministic fixture generators for the four scenarios, with an injectable clock and a tests-only scenario registry.
 - [ ] 1.3 Implement Firestore repositories and the seed command (deterministic ids, batched, idempotent, reset option).
 - [ ] 1.4 Implement Neo4j constraints and the ingestion job (`MERGE`, idempotent); verify referential integrity.
-- [ ] 1.5 Implement `GraphService` queries: `get_node`, `neighbors`, `transaction_neighborhood`, `recent_senders`, `pass_through`, `links_to_flagged`, `account_age_days` (parameterized).
-- [ ] 1.6 Tests (emulator + Neo4j container): fixture determinism, seed idempotency, integrity, each scenario's raw facts (shopkeeper: many senders, old account, no flagged links; Novatrade: young, no stored signal, fan-in, pass-through, flagged links; Priya: 2 transactions, no links; Asha: baseline), bounded neighborhood, unknown id, no verdict or scenario labels in stored data.
+- [ ] 1.5 Implement `GraphService` queries: `get_node`, `neighbors`, `transaction_neighborhood`, `account_age_days`, `recent_senders`, `flow_profile` (dwell, retention, velocity), `forwarding_chain` (parameterized).
+- [ ] 1.6 Tests (emulator + Neo4j container): fixture determinism, seed idempotency, integrity, each scenario's raw facts (shopkeeper: 12 senders, old account, long dwell, about 57% retained; restaurant: high pass-through ratio but hours of dwell, single hop; Novatrade chain: minutes of dwell, about 2% retention, 3-hop layering, 8 senders, 32 transactions; Priya: 2 transactions; Asha: baseline), bounded neighborhood, unknown id, no verdict or scenario labels in stored data.
 - [ ] 1.7 Document setup, seeding, and sample queries in the README.
 
 ## 2. Slice 2 — Backend foundation and access control
@@ -83,7 +83,7 @@ Specs: `investigation-console`, `access-control`.
 
 Spec: `integration-testing`.
 
-- [ ] 7.1 Full scenario end-to-end run including model misbehavior cases and the "remove the mule links" proof.
+- [ ] 7.1 Full scenario end-to-end run including model misbehavior cases and the "delay the forwarding transactions lowers the result" proof.
 - [ ] 7.2 Container image and Cloud Run deployment; Secret Manager for credentials; Neo4j hosting decision documented.
 - [ ] 7.3 Remove the superseded TypeScript `services/fraud-api` and `services/agents` after parity; update README and demo script.
 - [ ] 7.4 Mobile/desktop visual pass and accessibility audit.

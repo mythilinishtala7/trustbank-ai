@@ -21,9 +21,10 @@ Automated tests SHALL run the real ADK agents with a stubbed model backend that 
 Tests SHALL seed the data and execute the table in `risk-policy` through the API, asserting outcomes, evidence ids, provenance, and stored assessments.
 
 #### Scenario: Evidence-driven detection
-- GIVEN `ben_novatrade` has no complaints and no stored signal
-- THEN a payment to it SHALL be elevated because of fan-in, pass-through, and reported-account links found by Cypher queries
-- AND removing the mule relationships from the test graph SHALL lower the result (proving the outcome comes from the data)
+- GIVEN `ben_novatrade` has no complaint, flag, or stored signal
+- THEN a payment to it SHALL be elevated because of dwell time, retention, fan-in, layering, and velocity found by Cypher queries
+- AND in a test graph where the forwarding transactions are delayed by days, the result SHALL be lower (proving the outcome comes from the behavior in the data)
+- AND `ben_spice_garden` (high pass-through ratio, long dwell) SHALL NOT be elevated
 
 #### Scenario: No scenario leakage
 - THEN a test SHALL assert that no agent input or tool argument contains scenario names or registry data

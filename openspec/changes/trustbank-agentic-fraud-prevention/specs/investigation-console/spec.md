@@ -32,11 +32,15 @@ The panel SHALL show each agent's status, score, confidence, evidence with prove
 
 #### Scenario: Genuine shopkeeper transaction
 - GIVEN a payment to `ben_sharma_store`
-- THEN the console SHALL show no suspicious evidence and treat the recipient's volume as ordinary context
+- THEN the console SHALL show no suspicious evidence and treat the recipient's volume as ordinary context, showing the long dwell and retention that cleared it
 
-#### Scenario: Fraudulent network transaction
+#### Scenario: Mule network transaction
 - GIVEN a payment to `ben_novatrade`
-- THEN the graph SHALL highlight linked reported accounts and the panel SHALL list fan-in, pass-through, and link evidence with provenance
+- THEN the graph SHALL highlight the forwarding chain and the panel SHALL list dwell time, retention, fan-in, layering, and velocity evidence with provenance and per-hop timings
+
+#### Scenario: High pass-through that is cleared
+- GIVEN a payment to `ben_spice_garden`
+- THEN the panel SHALL show the high pass-through ratio together with the long dwell, single hop, and regular schedule that explain why it was not flagged
 
 ### Requirement: Graph view
 Select, zoom, pan, fit, legend; selecting a node shows its id, type, and relevant evidence.

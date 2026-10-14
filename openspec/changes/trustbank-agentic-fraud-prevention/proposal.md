@@ -34,7 +34,7 @@ A simulated banking application backed by a real backend, a Neo4j knowledge grap
 |---|---|
 | Backend API, auth, payment state machine | Customers, accounts, beneficiaries |
 | ADK agents and tool calls | Transactions and the fraud network |
-| Cypher queries on Neo4j | Reported intelligence (complaints, shared devices) |
+| Cypher queries on Neo4j | Declared relationships (supplier, same owner) |
 | Gemini calls | Payments and PIN entry (simulated; no real money) |
 | Risk aggregation policy | |
 
@@ -42,10 +42,12 @@ Scenario data is made up, but outcomes SHALL emerge from running the real agents
 
 ## Scenarios (acceptance data)
 
-1. **Genuine shopkeeper:** established, high volume, many senders, no flagged links. Must not be flagged.
-2. **Fraudulent beneficiary network:** new account with no complaints but fan-in, pass-through, and links to reported accounts. Must be detected from independent evidence.
+1. **Genuine shopkeeper:** established, high volume, many senders, money held for days. Must not be flagged. Related cases: a genuine new business, a high-ticket jeweller, and a restaurant with high daily pass-through but long dwell.
+2. **Mule network:** accounts recognised by behavior, not complaints: money forwarded within minutes, near-zero retention, multi-hop layering, high velocity, fan-in. Must be detected from independent behaviors.
 3. **Normal low-activity customer:** few transactions. Limited history is not a signal.
 4. **General customer:** history that supports baseline deviation detection.
+
+Ten payment scenarios cover these; see `knowledge-graph-data.md`.
 
 ## Out of scope
 
