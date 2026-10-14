@@ -5,17 +5,17 @@ One slice at a time. A task is done only when its acceptance criteria pass and t
 ## 0. Contracts and repository setup
 
 - [ ] 0.1 Review and approve all specs; freeze graph schema, scenario ids, `AgentFinding`/`Evidence`/`Question`/`Answer`, `Assessment`/`Payment`, state machine, and API paths.
-- [ ] 0.2 Scaffold `services/backend` (Python 3.12, FastAPI, pydantic v2, pytest, ruff, mypy, `pyproject.toml`); health endpoint; config validation.
-- [ ] 0.3 Add `infra/docker-compose.yml` (Neo4j 5, Firestore emulator), `firestore.rules` (deny all), `firestore.indexes.json`, `.env.example`; document how to start.
+- [x] 0.2 Scaffold `services/backend` (Python 3.12 target; 3.14 locally, FastAPI, pydantic v2, pytest, ruff, mypy, `pyproject.toml`); health endpoint; config validation.
+- [ ] 0.3 (partly done: Firestore emulator config, rules, indexes; Neo4j compose and `.env.example` remain) Add `infra/docker-compose.yml` (Neo4j 5, Firestore emulator), `firestore.rules` (deny all), `firestore.indexes.json`, `.env.example`; document how to start.
 - [ ] 0.4 Export the OpenAPI document and decide how Angular models are generated or mirrored.
 
 ## 1. Slice 1 — Synthetic data and knowledge graph (current focus)
 
 Spec: `specs/knowledge-graph`.
 
-- [ ] 1.1 Define Pydantic models for Firestore documents (customers, accounts, beneficiaries, transactions) and graph nodes/relationships with provenance.
-- [ ] 1.2 Create deterministic fixture generators for the four scenarios, with an injectable clock and a tests-only scenario registry.
-- [ ] 1.3 Implement Firestore repositories and the seed command (deterministic ids, batched, idempotent, reset option).
+- [x] 1.1 Define Pydantic models for Firestore documents (customers, accounts, beneficiaries, transactions) and graph nodes/relationships with provenance.
+- [x] 1.2 Create deterministic fixture generators for the four scenarios, with an injectable clock and a tests-only scenario registry.
+- [x] 1.3 Implement Firestore repositories and the seed command (deterministic ids, batched, idempotent, reset option).
 - [ ] 1.4 Implement Neo4j constraints and the ingestion job (`MERGE`, idempotent); verify referential integrity.
 - [ ] 1.5 Implement `GraphService` queries: `get_node`, `neighbors`, `transaction_neighborhood`, `account_age_days`, `recent_senders`, `flow_profile` (dwell, retention, velocity), `forwarding_chain` (parameterized).
 - [ ] 1.6 Tests (emulator + Neo4j container): fixture determinism, seed idempotency, integrity, each scenario's raw facts (shopkeeper: 12 senders, old account, long dwell, about 57% retained; restaurant: high pass-through ratio but hours of dwell, single hop; Novatrade chain: minutes of dwell, about 2% retention, 3-hop layering, 8 senders, 32 transactions; Priya: 2 transactions; Asha: baseline), bounded neighborhood, unknown id, no verdict or scenario labels in stored data.
