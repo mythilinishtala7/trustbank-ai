@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "project-b63ed173-f777-4777-81a"
+  },
+  "targets": {
+    "project-b63ed173-f777-4777-81a": {
+      "hosting": {
+        "app": [
+          "trustbank-pausepay"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

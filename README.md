@@ -1,66 +1,102 @@
-# TrustBank — OpenSpec Starter
+# TrustBank AI
 
-This folder is a starter specification for a hackathon prototype: a fictional banking app that demonstrates AI-assisted scam prevention before simulated payment authorization.
+Agentic fraud prevention **before payment authorization**. A simulated payment flow where a knowledge graph and real Google ADK agents (on Gemini) assess the recipient and the transaction, ask contextual questions, and apply a simulated 3-minute hold when the policy requires it.
 
-## How to use it
+All data is synthetic. Payments and PIN entry are simulated; no real money or credentials are involved. The agents, graph queries and Gemini calls are real.
 
-1. Copy `openspec/` and `COPILOT_INSTRUCTIONS.md` into your repository.
-2. Review the proposal and design against your existing codebase. Treat the current repository's framework and conventions as authoritative.
-3. Install/use the OpenSpec CLI your team already prefers, then validate the change using your installed version's commands.
-4. Ask Copilot to implement one task at a time from `openspec/changes/trustbank-agentic-fraud-prevention/tasks.md`.
-5. Keep this change folder until implementation and acceptance checks are complete; archive it using your team's OpenSpec workflow.
+## How it works
 
-> OpenSpec CLI commands and file conventions can vary by version. Follow the version installed in your repository if it differs from this starter structure.
+```
+Angular (customer app  +  /investigation console)
+              │
+        FastAPI backend ── dummy customer entry, investigator access code
+              │
+   Orchestrator (Google ADK)
+     ├─ Anomaly agent          deterministic, uses customer history
+     ├─ Fraud-network agent    deterministic, uses Neo4j graph queries
+     ├─ Questionnaire agent    Gemini
+     └─ Explainer agent        Gemini
+              │
+   Deterministic risk policy ── proceed · review · hold · cancel
+              │
+     Neo4j (graph)      Firestore (system of record)
+```
 
-## Suggested parallel work split
+- Agents produce evidence and recommendations; the deterministic policy and payment service own every state transition.
+- A graph connection is evidence to investigate, not proof of guilt. A new recipient or limited history is never high risk on its own.
+- A hold never auto-releases when the timer expires; the customer must cancel or confirm independent verification.
 
-- **Developer A — Banking UX:** payment flow, transaction history, simulated authorization, visual design system.
-- **Developer B — Fraud intelligence:** synthetic dataset, deterministic risk engine, graph visualization and node details.
-- **Shared integration — AI intervention:** connect the risk results to contextual questions, explanations, and the simulated hold. Agree on the API/data contracts before parallel implementation.
+### Two experiences
 
-Do not have both developers modify the same files at the same time. Integrate via small PRs and shared TypeScript interfaces.
+| | Customer app (`/`) | Investigation console (`/investigation`) |
+|---|---|---|
+| Audience | Customer | Demo presenter / judges |
+| Entry | Pick a demo persona (no credentials) | Demo access code, enforced by the backend |
+| Shows | Payment flow, clear warning, questions, hold, cancel | Live agent timeline, graph, evidence, policy decision |
+| Never shows | Agent names, risk scores, graph, traces | n/a |
 
-## Product guardrails
+Search the same `txn_` reference in the console to see how the agents reached the decision.
 
-- All customers, accounts, transfers, risk indicators, and outcomes are synthetic.
-- No real banking integration, real money movement, or real PIN collection.
-- The LLM explains verified signals and interprets context; deterministic code owns the risk decision and simulated payment state.
-- A new/unfamiliar beneficiary alone must not be labeled fraudulent.
+### Synthetic scenarios
+
+| Scenario | Purpose |
+|---|---|
+| Genuine shopkeeper | High-volume legitimate activity is not flagged |
+| Fraudulent beneficiary network | Risk found from graph behavior and independent signals |
+| Normal low-activity account | Limited history is not evidence of fraud |
+| General customer | Deviations from individual behavior are detected |
+
+Outcomes are never hardcoded; the agents compute them from the data.
+
+## Specification
+
+The OpenSpec change is the source of truth: `openspec/changes/trustbank-agentic-fraud-prevention/`
+
+| File | Contents |
+|---|---|
+| `proposal.md` | Why, scope, stack, success criteria |
+| `design.md` | Architecture, data split, contracts, failure handling |
+| `tasks.md` | Implementation slices 0–7 |
+| `specs/knowledge-graph` | Neo4j schema, provenance, fixtures, queries |
+| `specs/agent-orchestration` | Agents, contracts, orchestrator |
+| `specs/risk-policy` | Scoring, thresholds, payment state machine |
+| `specs/backend-api` | API endpoints and response models |
+| `specs/access-control` | Dummy entry and investigator access |
+| `specs/customer-experience` | Customer payment journey |
+| `specs/investigation-console` | Console behavior |
+| `specs/integration-testing` | Test layers and scenario acceptance |
+
+Appeals and full user accounts are deferred (not in the MVP).
+
+## Working with the spec
+
+1. Read the proposal and design, then pick the next unchecked task in `tasks.md`.
+2. Implement one task at a time, with tests; stop for review after each.
+3. Tick the task off and keep the change folder until acceptance checks pass.
+
+Guidance for Copilot: `COPILOT_INSTRUCTIONS.md`.
+
+## Stack
+
+| Layer | Choice |
+|---|---|
+| Frontend | Angular |
+| Backend | Python, FastAPI |
+| Agents | Google ADK (Python) |
+| Model | Gemini via Vertex AI |
+| Graph | Neo4j |
+| System of record | Firestore |
+| Hosting | Cloud Run (API), Firebase Hosting (web) |
+
+## Status
+
+The specification is complete and committed. Implementation starts with slice 1 (synthetic data and knowledge graph).
+
+`apps/banking-web` and `services/{fraud-api,agents}` are the earlier TypeScript prototype. They are kept as reference for fixture values and are removed once the Python backend reaches parity (task 7.3). Their old run instructions no longer apply.
+
+## Guardrails
+
+- All customers, accounts, transfers, risk indicators and outcomes are synthetic.
+- No real banking integration, money movement or PIN collection.
+- Free-text customer answers are untrusted input and never alter policy directly.
 - Do not claim the prototype has proven real-world fraud reduction.
-
-## Run the prototype
-
-Requires Node 20+. Ports: API `3100`, web `4300`.
-
-```bash
-# Terminal 1 — API + agents (mock mode, no keys needed)
-cd services/agents && npm install
-cd ../fraud-api && npm install && npm run dev
-
-# Terminal 2 — web app
-cd apps/banking-web && npm install && npx ng serve --port 4300
-```
-
-Open http://localhost:4300 (customer app) and http://localhost:4300/investigator. Walkthrough: `docs/demo-script.md`.
-
-### Tests
-
-```bash
-cd services/agents && npm test
-cd services/fraud-api && npm test
-cd apps/banking-web && npx ng test --watch=false
-```
-
-### Gemini agents (Google ADK)
-
-Default is deterministic mock agents. To use Gemini through Google ADK, set before `npm run dev` in `services/fraud-api`:
-
-```bash
-export AGENT_MODE=adk
-# Vertex AI:
-export GOOGLE_GENAI_USE_VERTEXAI=TRUE GOOGLE_CLOUD_PROJECT=<project> GOOGLE_CLOUD_LOCATION=us-central1
-# or API key:  export GOOGLE_API_KEY=<key>
-export GEMINI_MODEL=gemini-2.5-flash   # optional
-```
-
-Keys stay server-side. If the model errors or returns ungrounded output, the app falls back to deterministic explanations and logs it in the decision trace. Agent design: `openspec/changes/trustbank-agentic-fraud-prevention/design.md`.
