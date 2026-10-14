@@ -47,7 +47,7 @@ Conventions
 | `cust_asha` ★ | Asha Menon | General customer, 9 transactions | 84,250 |
 | `cust_priya` ★ | Priya Nair | Low-activity, 2 transactions | 12,400 |
 | `cust_s01` … `cust_s12` | Shopper 1 … 12 | Pay shops and businesses | 0 |
-| `cust_v01` … `cust_v08` | Victim 1 … 8 | Pay into the mule network | 0 |
+| `cust_p01` … `cust_p08` | Karan S., Meera P., Imran K., Divya R., Rohit M., Sana A., Vikram T., Neha B. | Pay into the mule network | 0 |
 
 ### Beneficiaries
 
@@ -65,9 +65,9 @@ Conventions
 | `ben_spice_garden` | Spice Garden Restaurant | spice.garden@trustpay | 500 d |
 | `ben_spice_owner` | Spice Garden (owner account) | spice.owner@trustpay | 500 d |
 | `ben_novatrade` | Nova Trade Desk | nova.trade@trustpay | 3 d |
-| `ben_mule_b` | Quick Returns Hub | quick.returns@trustpay | 6 d |
-| `ben_mule_c` | Task Rewards Desk | task.rewards@trustpay | 11 d |
-| `ben_mule_d` | Swift Assist Services | swift.assist@trustpay | 9 d |
+| `ben_quickreturns` | Quick Returns Hub | quick.returns@trustpay | 6 d |
+| `ben_taskrewards` | Task Rewards Desk | task.rewards@trustpay | 11 d |
+| `ben_swiftassist` | Swift Assist Services | swift.assist@trustpay | 9 d |
 
 No complaint counts or flags exist on any entity.
 
@@ -93,7 +93,7 @@ Each has exactly one `SENT` (source account) and one `PAID` (beneficiary). All a
 | `txn_hist_8` | `ben_metrocafe` | 480 | Lunch | 2 |
 | `txn_hist_9` | `ben_metrocafe` | 360 | Coffee | 9 |
 
-Baseline: average ≈ 1,888, maximum 2,500, 4 usual recipients.
+Baseline: average ≈ 1,721, maximum 2,500, 4 usual recipients.
 
 ### 3.2 Priya Nair: 2 transactions
 
@@ -142,25 +142,25 @@ Resulting behavior: about 95% pass-through, but dwell is 3 to 10 hours, only one
 
 ### 3.7 Mule network: collection, layering, off-ramp
 
-Chain: victims → `ben_novatrade` (entry) → `ben_mule_b` → `ben_mule_c` → `ben_mule_d` (off-ramp, no onward transfers).
+Chain: victims → `ben_novatrade` (entry) → `ben_quickreturns` → `ben_taskrewards` → `ben_swiftassist` (off-ramp, no onward transfers).
 
-For k = 1..8, victim `cust_v0k` pays in, then funds are forwarded hop by hop:
+For k = 1..8, victim `cust_p0k` pays in, then funds are forwarded hop by hop:
 
 | k | Victim | Inbound amount | Hours ago (inbound) |
 |---|---|---|---|
-| 1 | `cust_v01` | 8,000 | 70 |
-| 2 | `cust_v02` | 12,000 | 60 |
-| 3 | `cust_v03` | 5,000 | 50 |
-| 4 | `cust_v04` | 9,500 | 41 |
-| 5 | `cust_v05` | 6,000 | 30 |
-| 6 | `cust_v06` | 15,000 | 22 |
-| 7 | `cust_v07` | 7,000 | 12 |
-| 8 | `cust_v08` | 11,000 | 5 |
+| 1 | `cust_p01` | 8,000 | 70 |
+| 2 | `cust_p02` | 12,000 | 60 |
+| 3 | `cust_p03` | 5,000 | 50 |
+| 4 | `cust_p04` | 9,500 | 41 |
+| 5 | `cust_p05` | 6,000 | 30 |
+| 6 | `cust_p06` | 15,000 | 22 |
+| 7 | `cust_p07` | 7,000 | 12 |
+| 8 | `cust_p08` | 11,000 | 5 |
 
 Forwards for each k (all `COMPLETED`):
-- hop 1: `ben_novatrade` → `ben_mule_b`, 98% of inbound, **6 minutes** after arrival
-- hop 2: `ben_mule_b` → `ben_mule_c`, 97%, **4 minutes** after hop 1
-- hop 3: `ben_mule_c` → `ben_mule_d`, 96%, **5 minutes** after hop 2
+- hop 1: `ben_novatrade` → `ben_quickreturns`, 98% of inbound, **6 minutes** after arrival
+- hop 2: `ben_quickreturns` → `ben_taskrewards`, 97%, **4 minutes** after hop 1
+- hop 3: `ben_taskrewards` → `ben_swiftassist`, 96%, **5 minutes** after hop 2
 
 Ids: `net_in_k`, `net_h1_k`, `net_h2_k`, `net_h3_k` (32 transactions). Each account keeps only 1 to 2% as a fee, so balances stay near zero.
 
@@ -211,7 +211,7 @@ None seeded. See section 0.
 | S7 | 95% pass-through but 3 to 10 h dwell, single hop, daily schedule, 500 days old, declared owner link | Proceed |
 | S8 | Amount deviation; minutes of dwell, about 2% retention, 3-hop layering, 8 senders, high velocity: at least two independent behaviors | Review with benign answers; Hold with scam answers |
 | S9 | Same network behavior; modest amount; thin history gives low-confidence anomaly | Review with benign answers; Hold with scam answers |
-| S10 | Mid-chain account: short dwell, near-zero retention, forwards to `ben_mule_c`, receives from `ben_novatrade` | Elevated; questions; Review with benign answers, Hold with scam answers |
+| S10 | Mid-chain account: short dwell, near-zero retention, forwards to `ben_taskrewards`, receives from `ben_novatrade` | Elevated; questions; Review with benign answers, Hold with scam answers |
 
 ## 8. Decisions (resolved)
 
@@ -219,5 +219,5 @@ None seeded. See section 0.
 2. Spice Garden Restaurant (S7) stays as the hard false positive.
 3. Risk is always computed by the agents. Only data is stored; no risk signals are seeded.
 4. Scope stays on the main use cases: one mule chain, no second network shape.
-5. Shop and victim payers are `Customer` nodes (`cust_s*`, `cust_v*`) because every sender in the graph needs an account to send from; this has no effect on the demo, where only Asha and Priya are selectable personas.
+5. Shop and victim payers are `Customer` nodes (`cust_s*`, `cust_p*`) because every sender in the graph needs an account to send from; this has no effect on the demo, where only Asha and Priya are selectable personas.
 6. `knowledge-graph`, `risk-policy`, `agent-orchestration`, `investigation-console`, `integration-testing`, `proposal` and `tasks` are updated to match this document.

@@ -78,6 +78,6 @@ When the real agents and policy run over the seeded data:
 | S7 | Asha → Spice Garden Restaurant ₹1,800 | LOW, `PROCEED` (high pass-through but long dwell, single hop, regular schedule) |
 | S8 | Asha → `ben_novatrade` ₹25,000 | Elevated; benign answers → `REVIEW`; messaging-app source and promised payout → `HOLD`, 180 s |
 | S9 | Priya → `ben_novatrade` ₹8,000 | Elevated by network evidence; benign → `REVIEW`; scam answers → `HOLD` |
-| S10 | Asha → `ben_mule_b` ₹5,000 | Elevated by the account's own behavior; benign → `REVIEW`; scam answers → `HOLD` |
+| S10 | Asha → `ben_quickreturns` ₹5,000 | Elevated by the account's own behavior; benign → `REVIEW`; scam answers → `HOLD` |
 
 Scenario ids and amounts are fixed by `knowledge-graph-data.md`. Outcomes are test assertions over real agent runs, never stored.

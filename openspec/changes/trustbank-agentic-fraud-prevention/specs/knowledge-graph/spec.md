@@ -86,10 +86,10 @@ Fixtures SHALL be deterministic (no randomness; timestamps relative to an inject
 - AND a `VERIFIED_SYNTHETIC` `CONNECTED_TO` of kind `BUSINESS_SUPPLIER` between the two accounts
 - AND queries SHALL show long dwell (days) and about 57% retention, so nothing is flagged because of behavior, not because of a label
 
-#### Scenario: Mule network (`ben_novatrade`, `ben_mule_b`, `ben_mule_c`, `ben_mule_d`)
+#### Scenario: Mule network (`ben_novatrade`, `ben_quickreturns`, `ben_taskrewards`, `ben_swiftassist`)
 - THEN `ben_novatrade` SHALL be about 3 days old and have no stored signal, flag, or complaint
-- AND 8 victim customers SHALL each pay `ben_novatrade`, and each amount SHALL be forwarded `ben_novatrade` → `ben_mule_b` → `ben_mule_c` → `ben_mule_d` with gaps of about 6, 4 and 5 minutes, keeping 1–2% at each hop
-- AND `ben_mule_d` SHALL have no onward transfers
+- AND 8 victim customers SHALL each pay `ben_novatrade`, and each amount SHALL be forwarded `ben_novatrade` → `ben_quickreturns` → `ben_taskrewards` → `ben_swiftassist` with gaps of about 6, 4 and 5 minutes, keeping 1–2% at each hop
+- AND `ben_swiftassist` SHALL have no onward transfers
 - AND no `CONNECTED_TO` relationship SHALL exist between mule accounts
 - AND at least two independent behaviors (low dwell, low retention, fan-in, layering, velocity) SHALL be detectable
 
