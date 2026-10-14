@@ -7,7 +7,7 @@ This folder is a starter specification for a hackathon prototype: a fictional ba
 1. Copy `openspec/` and `COPILOT_INSTRUCTIONS.md` into your repository.
 2. Review the proposal and design against your existing codebase. Treat the current repository's framework and conventions as authoritative.
 3. Install/use the OpenSpec CLI your team already prefers, then validate the change using your installed version's commands.
-4. Ask Copilot to implement one task at a time from `openspec/changes/trustbank-scam-intervention/tasks.md`.
+4. Ask Copilot to implement one task at a time from `openspec/changes/trustbank-agentic-fraud-prevention/tasks.md`.
 5. Keep this change folder until implementation and acceptance checks are complete; archive it using your team's OpenSpec workflow.
 
 > OpenSpec CLI commands and file conventions can vary by version. Follow the version installed in your repository if it differs from this starter structure.
@@ -63,4 +63,4 @@ export GOOGLE_GENAI_USE_VERTEXAI=TRUE GOOGLE_CLOUD_PROJECT=<project> GOOGLE_CLOU
 export GEMINI_MODEL=gemini-2.5-flash   # optional
 ```
 
-Keys stay server-side. If the model errors or returns ungrounded output, the app falls back to deterministic explanations and logs it in the decision trace. Agent design: `openspec/changes/trustbank-scam-intervention/design.md`.
+Keys stay server-side. If the model errors or returns ungrounded output, the app falls back to deterministic explanations and logs it in the decision trace. Agent design: `openspec/changes/trustbank-agentic-fraud-prevention/design.md`.

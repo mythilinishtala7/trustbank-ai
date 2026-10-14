@@ -7,10 +7,10 @@ You are implementing a polished, demo-ready prototype from the OpenSpec change. 
 1. Inspect the existing repository, package scripts, framework versions, routing, component conventions, tests, and current design system.
 2. Do not replace the existing framework or restructure the whole repository without approval.
 3. Read:
-   - `openspec/changes/trustbank-scam-intervention/proposal.md`
-   - `openspec/changes/trustbank-scam-intervention/design.md`
-   - `openspec/changes/trustbank-scam-intervention/tasks.md`
-   - all specs under `openspec/changes/trustbank-scam-intervention/specs/`
+   - `openspec/changes/trustbank-agentic-fraud-prevention/proposal.md`
+   - `openspec/changes/trustbank-agentic-fraud-prevention/design.md`
+   - `openspec/changes/trustbank-agentic-fraud-prevention/tasks.md`
+   - all specs under `openspec/changes/trustbank-agentic-fraud-prevention/specs/`
 4. Report the repository's current architecture and identify the first small task to implement.
 5. Implement only the requested task. Do not generate the entire application in one response.
 
@@ -37,7 +37,7 @@ TrustBank is a fictional banking experience whose differentiator is intervention
 - Make demo scenarios deterministic and reproducible.
 - Add or update tests for each meaningful behavior.
 - Do not add dependencies without explaining why and checking compatibility with the existing stack.
-- Do not expose API keys in frontend code. The app must work in mock-agent mode without an external model.
+- Do not expose API keys in frontend code. Gemini is called server-side through Google ADK only; automated tests use a stubbed model, and there is no mock agent provider.
 - Do not pretend that a frontend countdown is a bank-enforced hold; this is a simulated state inside the prototype.
 
 ## Risk and safety rules
