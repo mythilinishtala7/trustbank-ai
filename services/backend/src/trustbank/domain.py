@@ -55,6 +55,7 @@ class Account(_Document):
     owner_id: str
     owner_type: OwnerType
     opened_at: datetime
+    account_number: str
     masked_number: str
 
 

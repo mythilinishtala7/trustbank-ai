@@ -63,13 +63,15 @@ class _Builder:
         return self.now - timedelta(hours=hours)
 
     def _account(self, owner_id: str, owner_type: OwnerType, opened_at: datetime) -> None:
-        masked = f"XXXXXX{1000 + crc32(owner_id.encode()) % 9000}"
+        number = str(500_000_000_000 + crc32(owner_id.encode()) % 100_000_000)
+        masked = f"XXXXXXXX{number[-4:]}"
         self.accounts.append(
             Account(
                 id=account_id(owner_id),
                 owner_id=owner_id,
                 owner_type=owner_type,
                 opened_at=opened_at,
+                account_number=number,
                 masked_number=masked,
             )
         )

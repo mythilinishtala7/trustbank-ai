@@ -27,6 +27,11 @@ def main(argv: list[str] | None = None) -> None:
             raise SystemExit("aborted")
         client = firestore.Client(project=args.remote)
     else:
+        if not settings.firestore_emulator_host:
+            raise SystemExit(
+                "Set TRUSTBANK_FIRESTORE_EMULATOR_HOST to seed the emulator, "
+                "or pass --remote PROJECT_ID to seed real Firestore."
+            )
         client = create_client(settings)
     repo = DatasetRepository(client)
     if args.reset:

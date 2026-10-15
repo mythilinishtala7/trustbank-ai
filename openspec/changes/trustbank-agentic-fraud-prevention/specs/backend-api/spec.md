@@ -29,7 +29,7 @@ Endpoints under `/api/v1`, with an OpenAPI document generated from Pydantic mode
 
 #### Scenario: Error format
 - WHEN a request fails
-- THEN the response SHALL be `{ "error": { "code": string, "message": string, "requestId": string } }` with status 400, 401, 403, 404, 409, 422, or 503
+- THEN the response SHALL be `{ "error": { "code": string, "message": string, "requestId": string } }` with status 400, 401, 403, 404, 409, 422, 429, or 503
 - AND internal details SHALL NOT be leaked
 
 ### Requirement: Separate response models

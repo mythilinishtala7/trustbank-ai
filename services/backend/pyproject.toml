@@ -9,6 +9,8 @@ dependencies = [
     "pydantic>=2.8",
     "pydantic-settings>=2.4",
     "google-cloud-firestore>=2.19",
+    "neo4j>=5.26",
+    "pyjwt>=2.8",
 ]
 
 [project.optional-dependencies]

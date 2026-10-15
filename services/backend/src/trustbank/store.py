@@ -14,6 +14,7 @@ from trustbank.domain import (
     Connection,
     Customer,
     Dataset,
+    OwnerType,
     Transaction,
 )
 
@@ -28,15 +29,11 @@ _BATCH_SIZE = 400  # Firestore allows 500 writes per batch
 
 
 def create_client(settings: Settings) -> firestore.Client:
-    """Build a client. Refuses to run against real Firestore unless deployed."""
+    """Build a client: the emulator when a host is configured, else real Firestore via ADC."""
     if settings.firestore_emulator_host:
         import os
 
         os.environ["FIRESTORE_EMULATOR_HOST"] = settings.firestore_emulator_host
-    elif not settings.is_deployed:
-        raise RuntimeError(
-            "Set TRUSTBANK_FIRESTORE_EMULATOR_HOST (e.g. 127.0.0.1:8085) for local/test runs."
-        )
     return firestore.Client(project=settings.google_cloud_project)
 
 
@@ -117,3 +114,31 @@ class DatasetRepository:
             .limit(limit)
         )
         return [Transaction.model_validate(d.to_dict()) for d in query.stream()]
+
+    def list_demo_personas(self) -> list[Customer]:
+        query = self._db.collection(CUSTOMERS).where(
+            filter=FieldFilter("is_demo_persona", "==", True)
+        )
+        return sorted(
+            (Customer.model_validate(d.to_dict()) for d in query.stream()), key=lambda c: c.id
+        )
+
+    def find_beneficiary_by_handle(self, handle: str) -> Beneficiary | None:
+        query = self._db.collection(BENEFICIARIES).where(filter=FieldFilter("handle", "==", handle))
+        docs = list(query.limit(1).stream())
+        return Beneficiary.model_validate(docs[0].to_dict()) if docs else None
+
+    def find_beneficiary_by_account_number(self, number: str) -> Beneficiary | None:
+        query = self._db.collection(ACCOUNTS).where(
+            filter=FieldFilter("account_number", "==", number)
+        )
+        docs = list(query.limit(1).stream())
+        if not docs:
+            return None
+        account = Account.model_validate(docs[0].to_dict())
+        if account.owner_type != OwnerType.BENEFICIARY:
+            return None
+        return self.get_beneficiary(account.owner_id)
+
+    def ping(self) -> None:
+        next(iter(self._db.collection(CUSTOMERS).limit(1).stream()), None)
