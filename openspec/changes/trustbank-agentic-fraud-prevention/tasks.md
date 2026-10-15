@@ -18,7 +18,7 @@ Spec: `specs/knowledge-graph`.
 - [x] 1.3 Implement Firestore repositories and the seed command (deterministic ids, batched, idempotent, reset option).
 - [x] 1.4 Implement Neo4j constraints and the ingestion job (`MERGE`, idempotent); verify referential integrity.
 - [x] 1.5 Implement `GraphService` queries: `get_node`, `neighbors`, `transaction_neighborhood`, `account_age_days`, `recent_senders`, `flow_profile` (dwell, retention, velocity), `forwarding_chain` (parameterized).
-- [ ] 1.6 Document setup, seeding, and sample queries in the README.
+- [x] 1.6 Document setup, seeding, and sample queries in the README.
 
 ## 2. Slice 2 — Backend foundation and access control
 
