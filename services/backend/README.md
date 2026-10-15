@@ -4,7 +4,8 @@ Design lives in `openspec/changes/trustbank-agentic-fraud-prevention/` (start wi
 
 ## Status
 
-Done: 0.2, 0.3, 1.1 to 1.6, 2.1 to 2.5 (see `tasks.md`). Next: slice 3 (agents).
+Done: 0.2, 0.3, 1.1 to 1.6, 2.1 to 2.5, 3.1, 3.2 (see `tasks.md`). Next: 3.3 fraud network agent.
+How to run the API and test every endpoint with curl: `API_TESTING.md`.
 Working style: one task at a time, stop for review. Risk is computed by agents only; data holds facts only.
 No new tests unless asked (author preference). Existing `tests/test_fixtures.py` stays.
 
@@ -88,10 +89,12 @@ repo = DatasetRepository(create_client(settings))
 graph = GraphService(create_driver(settings))
 as_of = repo.get_beneficiary("ben_novatrade").first_seen_at + timedelta(days=3)
 
-graph.account_age_days("acct_novatrade", as_of)                 # 3
-graph.flow_profile("acct_novatrade", 72, as_of)                 # retention 0.02, median dwell 6 min, 8 senders
+graph.account_age_days("acct_novatrade", as_of)  # 3
+graph.flow_profile("acct_novatrade", 72, as_of)  # retention 0.02, median dwell 6 min, 8 senders
 graph.recent_senders("acct_novatrade", 72, as_of)
-graph.forwarding_chain("acct_novatrade", "forward", 72, as_of)  # Quick Returns -> Task Rewards -> Swift Assist
+graph.forwarding_chain(
+    "acct_novatrade", "forward", 72, as_of
+)  # Quick Returns -> Task Rewards -> Swift Assist
 graph.transaction_neighborhood("txn_hist_8", depth=2)
 ```
 

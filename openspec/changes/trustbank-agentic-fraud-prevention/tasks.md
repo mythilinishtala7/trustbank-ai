@@ -34,8 +34,8 @@ Specs: `backend-api`, `access-control`.
 
 Spec: `agent-orchestration`.
 
-- [ ] 3.1 Pydantic contracts and validators (schema, evidence grounding, enums).
-- [ ] 3.2 Anomaly agent (ADK custom agent) with statistical tools over Firestore history, including low-history confidence handling.
+- [x] 3.1 Pydantic contracts and validators (schema, evidence grounding, enums).
+- [x] 3.2 Anomaly agent (ADK custom agent) with statistical tools over Firestore history, including low-history confidence handling.
 - [ ] 3.3 Fraud network agent (ADK custom agent) with Cypher tools and corroboration/established-account rules.
 - [ ] 3.4 Questionnaire agent (`LlmAgent`) with structured output, fixed option sets, deterministic answer-to-evidence mapping, free-text classifier, prompt-injection defences.
 - [ ] 3.5 Explainer agent (`LlmAgent`) with grounding validation and template fallback.
