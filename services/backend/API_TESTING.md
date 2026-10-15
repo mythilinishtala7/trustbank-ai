@@ -6,16 +6,21 @@ All commands assume the repo root unless a `cd` is shown. Data is synthetic.
 
 ```bash
 cd services/backend
-uv venv --python /opt/homebrew/bin/python3.14 .venv       # 3.12 download is blocked by corporate TLS
+uv venv --python /opt/homebrew/bin/python3.14 .venv
 unset SSL_CERT_FILE; UV_NATIVE_TLS=1 uv pip install -e ".[dev]"
-cp ../../infra/.env.example .env
+[ -f .env ] || cp ../../infra/.env.example .env
 ```
+
+Python 3.14 is used because the 3.12 download is blocked by corporate TLS. If `services/backend/.env`
+already exists, keep it: the template has empty secrets and points at the Firestore emulator.
+The commands below carry `# comments`. In an interactive zsh run `setopt interactive_comments` once first,
+or `#` is passed as an argument and the command fails.
 
 Edit `services/backend/.env` (gitignored; never commit it):
 
 ```
 TRUSTBANK_ENVIRONMENT=local
-TRUSTBANK_GOOGLE_CLOUD_PROJECT=project-b63ed173-f777-4777-81a   # real Firestore
+TRUSTBANK_GOOGLE_CLOUD_PROJECT=project-b63ed173-f777-4777-81a
 TRUSTBANK_TOKEN_SECRET=<openssl rand -hex 32>
 TRUSTBANK_INVESTIGATOR_CODE=<any code you choose>
 TRUSTBANK_NEO4J_URI=bolt://localhost:7687
@@ -24,7 +29,7 @@ TRUSTBANK_NEO4J_PASSWORD=trustbank-local-pw
 ```
 
 The service refuses to start if the token secret (32+ characters) or investigator code is missing.
-Leave `TRUSTBANK_FIRESTORE_EMULATOR_HOST` unset to use real Firestore.
+Do not set `TRUSTBANK_FIRESTORE_EMULATOR_HOST` when using real Firestore (the template sets it; delete that line).
 
 ## 2. Prerequisites for each run
 
