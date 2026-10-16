@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .angular/
+.firebase/
 *.log
 .env
 .env.*

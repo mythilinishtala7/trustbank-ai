@@ -6,7 +6,7 @@
     "rewrites": [
       {
         "source": "/api/**",
-        "run": { "serviceId": "trustbank-api", "region": "us-central1" }
+        "run": { "serviceId": "trustbank-api", "region": "asia-southeast1" }
       },
       { "source": "**", "destination": "/index.html" }
     ]
