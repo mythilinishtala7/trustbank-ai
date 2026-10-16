@@ -233,6 +233,7 @@ def _small_merchants(b: _Builder) -> None:
 
 
 def _restaurant(b: _Builder) -> None:
+    # TODO: Restore graph-flow coverage after reconciling intended restaurant dwell range.
     slots = ((12, 30), (15, 30), (20, 0))
     for day in range(1, 21):
         total = 0
