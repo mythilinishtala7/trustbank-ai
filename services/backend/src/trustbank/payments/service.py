@@ -7,6 +7,7 @@ import time
 from collections.abc import Awaitable, Callable, Iterator
 from contextlib import contextmanager
 from datetime import datetime, timedelta
+from zlib import crc32
 
 from trustbank.contracts import (
     Action,
@@ -784,6 +785,7 @@ class PaymentService:
             owner_id=doc.beneficiary_id,
             owner_type=OwnerType.BENEFICIARY,
             opened_at=now,
+            account_number=str(500_000_000_000 + crc32(doc.beneficiary_id.encode()) % 100_000_000),
             masked_number=f"XXXXXX{digits}",
         )
         ctx.put(BENEFICIARIES, payee.id, payee.model_dump(mode="python"))
