@@ -19,9 +19,9 @@ h2 { margin: 0; }
 .seq, .when, .dur { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .type { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); }
 .status { font-size: 11px; font-weight: 700; padding: 0 8px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); }
-.status[data-status='DEGRADED'] { background: var(--amber-soft); color: var(--amber, #e0a83f); border: 1px solid #ead9a8; }
+.status[data-status='DEGRADED'] { background: var(--amber-soft); color: var(--amber, #8a5a00); border: 1px solid #ead9a8; }
 .status[data-status='FAILED'], .status[data-status='TIMEOUT'] { background: var(--danger-soft); color: var(--danger); }
-.status[data-status='OK'] { background: rgba(76, 195, 138, 0.15); color: var(--ok); }
+.status[data-status='OK'] { background: #e5f4ec; color: var(--ok); }
 .msg { margin: 4px 0 0; }
 .tool { margin-top: 4px; padding: 6px 8px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
 .k { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-right: 4px; }

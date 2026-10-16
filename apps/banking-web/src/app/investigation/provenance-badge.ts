@@ -13,9 +13,9 @@ import { PROVENANCE_LABELS, Provenance } from './investigation.models';
   `,
   styles: `
     .prov { display: inline-flex; gap: 4px; align-items: center; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
-    .prov-verified_synthetic { color: #5fd4cb; background: rgba(95, 212, 203, 0.12); border-color: rgba(95, 212, 203, 0.4); }
-    .prov-inferred { color: #b79cf0; background: rgba(183, 156, 240, 0.12); border-color: rgba(183, 156, 240, 0.4); border-style: dashed; }
-    .prov-user_provided { color: #f0a95e; background: rgba(240, 169, 94, 0.12); border-color: rgba(240, 169, 94, 0.4); }
+    .prov-verified_synthetic { color: #0b6b66; background: #e0f4f2; border-color: #9fd6d1; }
+    .prov-inferred { color: #5b32b0; background: #efe9fb; border-color: #c9b6ee; border-style: dashed; }
+    .prov-user_provided { color: #8a4600; background: #fff0dc; border-color: #f0c78f; }
   `,
 })
 export class ProvenanceBadge {

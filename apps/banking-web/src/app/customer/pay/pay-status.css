@@ -13,5 +13,5 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
 .receipt-badge { display: inline-block; margin: 0 0 12px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; }
-.receipt-mark { width: 52px; height: 52px; border-radius: 50%; background: rgba(76, 195, 138, 0.15); color: var(--ok); display: grid; place-items: center; font-size: 26px; font-weight: 800; margin-bottom: 12px; }
+.receipt-mark { width: 52px; height: 52px; border-radius: 50%; background: #e5f4ec; color: var(--ok); display: grid; place-items: center; font-size: 26px; font-weight: 800; margin-bottom: 12px; }
 .amt.big { font-size: 34px; font-weight: 750; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }

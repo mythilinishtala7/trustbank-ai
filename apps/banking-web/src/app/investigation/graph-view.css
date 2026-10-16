@@ -2,7 +2,7 @@ header { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wr
 h2 { margin: 0 0 4px; }
 .tools { display: flex; gap: 6px; flex-wrap: wrap; }
 .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; margin-top: 12px; align-items: start; }
-.canvas { height: 520px; background: var(--surface-raise, #182741); border: 1px solid var(--line, #e2e7ef); border-radius: 12px; }
+.canvas { height: 520px; background: var(--surface-raise, #f8fafd); border: 1px solid var(--line, #e2e7ef); border-radius: 12px; }
 .canvas:focus-visible { outline: 3px solid var(--blue-soft, #edf2fd); border-color: var(--blue, #2f5de1); }
 
 .legend { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 0; margin: 10px 0; font-size: 12px; color: var(--muted, #5d6b82); }
@@ -16,14 +16,14 @@ h2 { margin: 0 0 4px; }
 .line { display: inline-block; width: 22px; border-top: 2px solid #a8b3c4; }
 .line.dashed { border-top: 2px dashed #0b6b66; }
 .line.dotted { border-top: 2px dotted #5b32b0; }
-.hl { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 3px solid #4d7cfe; box-shadow: 0 0 0 3px rgba(77, 124, 254, 0.3); background: var(--surface-raise, #182741); }
+.hl { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 3px solid #2f5de1; box-shadow: 0 0 0 3px rgba(47, 93, 225, 0.25); background: var(--surface-raise, #f8fafd); }
 
 .entity-list summary { cursor: pointer; font-size: 13px; font-weight: 600; }
 .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; }
 .lists ul { list-style: none; margin: 6px 0; padding: 0; }
 .link { background: none; border: 0; padding: 2px 0; font: inherit; color: var(--blue, #2f5de1); cursor: pointer; text-align: left; }
 .link[aria-pressed='true'] { font-weight: 700; text-decoration: underline; }
-.hl-tag { font-size: 10px; font-weight: 700; color: #93b0ff; background: var(--blue-soft, #edf2fd); padding: 0 6px; border-radius: 999px; margin-left: 4px; }
+.hl-tag { font-size: 10px; font-weight: 700; color: #2349b8; background: var(--blue-soft, #edf2fd); padding: 0 6px; border-radius: 999px; margin-left: 4px; }
 
 .detail { font-size: 13px; border: 1px solid var(--line, #e2e7ef); border-radius: 12px; padding: 12px; background: var(--bg, #f4f6f9); max-height: 640px; overflow: auto; }
 .detail h3 { margin: 0 0 8px; overflow-wrap: anywhere; }

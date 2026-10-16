@@ -2,14 +2,14 @@ import type cytoscape from 'cytoscape';
 import type { GraphEdge, GraphLabel, GraphNode, InvestigationGraph } from './investigation.models';
 
 export const NODE_STYLE: Record<GraphLabel, { shape: cytoscape.Css.NodeShape; fill: string; border: string }> = {
-  Customer: { shape: 'ellipse', fill: '#31446b', border: '#93a2ba' },
-  Account: { shape: 'round-rectangle', fill: '#1a2c4e', border: '#4d7cfe' },
-  Transaction: { shape: 'diamond', fill: '#1c2438', border: '#93a2ba' },
-  Beneficiary: { shape: 'hexagon', fill: '#12303f', border: '#4db3d9' },
-  RiskSignal: { shape: 'triangle', fill: '#2e2510', border: '#e0a83f' },
+  Customer: { shape: 'ellipse', fill: '#0b1f3a', border: '#0b1f3a' },
+  Account: { shape: 'round-rectangle', fill: '#e9effc', border: '#2f5de1' },
+  Transaction: { shape: 'diamond', fill: '#eef1f6', border: '#5d6b82' },
+  Beneficiary: { shape: 'hexagon', fill: '#e1f1f8', border: '#1f7a9c' },
+  RiskSignal: { shape: 'triangle', fill: '#faf1da', border: '#b8860b' },
 };
 
-export const PROVENANCE_EDGE_COLORS = { VERIFIED_SYNTHETIC: '#5fd4cb', INFERRED: '#b79cf0' } as const;
+export const PROVENANCE_EDGE_COLORS = { VERIFIED_SYNTHETIC: '#0b6b66', INFERRED: '#5b32b0' } as const;
 
 export function nodeLabel(n: Pick<GraphNode, 'name' | 'id'>): string {
   return n.name || n.id;
@@ -55,7 +55,7 @@ export function graphStyle(): cytoscape.StylesheetJson {
       style: {
         label: 'data(display)',
         'font-size': 11,
-        color: '#e9eff8',
+        color: '#0b1f3a',
         'text-valign': 'bottom',
         'text-margin-y': 6,
         'text-wrap': 'ellipsis',
@@ -71,14 +71,14 @@ export function graphStyle(): cytoscape.StylesheetJson {
       style: {
         width: 1.6,
         'curve-style': 'bezier',
-        'line-color': '#3d4f74',
-        'target-arrow-color': '#3d4f74',
+        'line-color': '#a8b3c4',
+        'target-arrow-color': '#a8b3c4',
         'target-arrow-shape': 'triangle',
         label: 'data(display)',
         'font-size': 9,
-        color: '#93a2ba',
+        color: '#47566d',
         'text-rotation': 'autorotate',
-        'text-background-color': '#0a1220',
+        'text-background-color': '#ffffff',
         'text-background-opacity': 0.85,
         'text-background-padding': '2px',
       },
@@ -86,9 +86,9 @@ export function graphStyle(): cytoscape.StylesheetJson {
     { selector: 'edge[provenance = "VERIFIED_SYNTHETIC"]', style: { 'line-color': PROVENANCE_EDGE_COLORS.VERIFIED_SYNTHETIC, 'target-arrow-color': PROVENANCE_EDGE_COLORS.VERIFIED_SYNTHETIC, 'line-style': 'dashed' } },
     { selector: 'edge[provenance = "INFERRED"]', style: { 'line-color': PROVENANCE_EDGE_COLORS.INFERRED, 'target-arrow-color': PROVENANCE_EDGE_COLORS.INFERRED, 'line-style': 'dotted' } },
     { selector: '.dim', style: { opacity: 0.5 } },
-    { selector: 'node.hl', style: { 'border-width': 4, 'underlay-color': '#4d7cfe', 'underlay-opacity': 0.28, 'underlay-padding': 8 } },
-    { selector: 'edge.hl', style: { width: 4, 'underlay-color': '#4d7cfe', 'underlay-opacity': 0.28, 'underlay-padding': 4 } },
-    { selector: ':selected', style: { 'border-color': '#e9eff8', 'border-width': 4, 'overlay-color': '#e9eff8', 'overlay-opacity': 0.12 } },
+    { selector: 'node.hl', style: { 'border-width': 4, 'underlay-color': '#2f5de1', 'underlay-opacity': 0.28, 'underlay-padding': 8 } },
+    { selector: 'edge.hl', style: { width: 4, 'underlay-color': '#2f5de1', 'underlay-opacity': 0.28, 'underlay-padding': 4 } },
+    { selector: ':selected', style: { 'border-color': '#0b1f3a', 'border-width': 4, 'overlay-color': '#0b1f3a', 'overlay-opacity': 0.12 } },
   ];
 }
 

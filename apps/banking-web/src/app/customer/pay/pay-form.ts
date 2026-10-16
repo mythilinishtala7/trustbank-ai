@@ -92,8 +92,8 @@ type Step = 'recipient' | 'amount' | 'review';
   `,
   styles: `
     .hint { margin-top: 6px; }
-    .recipient-card { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; padding: 12px 14px; border: 1px solid rgba(77, 124, 254, 0.45); background: var(--blue-soft); border-radius: 12px; }
-    .recipient-card.unverified { border-color: rgba(224, 168, 63, 0.45); background: var(--amber-soft); }
+    .recipient-card { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; padding: 12px 14px; border: 1px solid #c3d3f7; background: var(--blue-soft); border-radius: 12px; }
+    .recipient-card.unverified { border-color: #e6cf96; background: var(--amber-soft); }
     .verified { color: var(--ok); font-size: 13px; font-weight: 600; }
     .busy { margin: 16px 0 0; display: flex; gap: 10px; align-items: flex-start; font-weight: 600; }
     .spinner { width: 16px; height: 16px; margin-top: 4px; flex: none; border: 2px solid var(--line); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.9s linear infinite; }

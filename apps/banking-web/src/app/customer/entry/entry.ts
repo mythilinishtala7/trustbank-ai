@@ -50,9 +50,9 @@ import { FocusHeading } from '../ui/focus-heading';
     .persona-list { list-style: none; padding: 0; margin: 24px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 700px) { .persona-list { grid-template-columns: 1fr; } }
     .persona { height: 100%; width: 100%; text-align: left; display: flex; align-items: center; gap: 14px; padding: 18px; font: inherit; color: var(--navy); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); cursor: pointer; box-shadow: var(--shadow-card); transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s; }
-    .persona:hover:not(:disabled) { border-color: var(--blue); box-shadow: 0 6px 20px rgba(77, 124, 254, 0.25); transform: translateY(-2px); }
+    .persona:hover:not(:disabled) { border-color: var(--blue); box-shadow: 0 6px 20px rgba(47, 93, 225, 0.16); transform: translateY(-2px); }
     .persona:disabled { opacity: 0.6; cursor: wait; }
-    .avatar { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--blue-soft); color: var(--blue-dark); font-weight: 700; font-size: 15px; display: grid; place-items: center; border: 1px solid rgba(77, 124, 254, 0.35); }
+    .avatar { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--blue-soft); color: var(--blue-dark); font-weight: 700; font-size: 15px; display: grid; place-items: center; border: 1px solid #d7e2f8; }
     .info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
     .info b { font-size: 16px; }
     .info span { color: var(--muted); font-size: 14px; }
