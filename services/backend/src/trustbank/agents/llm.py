@@ -19,7 +19,11 @@ class ModelOutputError(Exception):
 
 
 def build_model(settings: Settings) -> BaseLlm:
-    os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "TRUE")
+    # Vertex AI by default; a Gemini API key switches to the Gemini API.
+    if os.environ.get("GOOGLE_API_KEY"):
+        os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "FALSE")
+    else:
+        os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "TRUE")
     # One attempt: the orchestrator owns the timeout and the degraded fallback.
     return Gemini(model=settings.model_name, retry_options=types.HttpRetryOptions(attempts=1))
 

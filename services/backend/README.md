@@ -77,10 +77,13 @@ Integrity violations are printed and the command exits non-zero.
 
 `build_orchestrator(settings, graph, repo)` returns the ADK orchestrator. The anomaly and fraud-network agents are
 deterministic custom ADK agents; the questionnaire and explainer are `LlmAgent`s on Gemini through Vertex AI
-(`TRUSTBANK_MODEL_NAME`, default `gemini-2.5-flash`; needs `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION` and ADC
+(`TRUSTBANK_MODEL_NAME`, default `gemini-3.8-flash`; needs `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION` and ADC
 with `aiplatform.endpoints.predict`). `GOOGLE_GENAI_USE_VERTEXAI` defaults to `TRUE`. Behind a corporate TLS proxy,
 point `SSL_CERT_FILE` at a bundle that includes the proxy CA plus the public roots. Without Gemini access the
 questionnaire and explainer degrade to fixed questions and a template explanation.
+
+Set `GOOGLE_API_KEY` to use the Gemini API instead of Vertex AI. Deployed API keys belong in Secret Manager and
+must be injected with `GOOGLE_GENAI_USE_VERTEXAI=FALSE`.
 
 Tests: graph and scenario tests need the running Neo4j (they rebuild it from the deterministic dataset, so re-run ingest
 afterwards if you want the seeded data back). Live Gemini smoke test: `.venv/bin/pytest -m live`.

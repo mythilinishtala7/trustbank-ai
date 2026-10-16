@@ -30,7 +30,9 @@ class Sink:
 
 
 def test_gemini_writes_questions_and_an_explanation() -> None:
-    os.environ.setdefault("GOOGLE_GENAI_USE_VERTEXAI", "TRUE")
+    os.environ.setdefault(
+        "GOOGLE_GENAI_USE_VERTEXAI", "FALSE" if os.environ.get("GOOGLE_API_KEY") else "TRUE"
+    )
     settings = Settings(_env_file=None, environment="test")
     orch = build_orchestrator(settings, cast(GraphService, None), cast(DatasetRepository, None))
     ctx = PaymentContext(

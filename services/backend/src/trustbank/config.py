@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     investigator_rate_limit: int = Field(default=5, ge=1)  # failed attempts per window per IP
     investigator_rate_window_seconds: int = Field(default=60, ge=1)
 
-    model_name: str = "gemini-2.5-flash"
+    model_name: str = "gemini-3.8-flash"
 
     anomaly_weight: float = Field(default=0.4, ge=0, le=1)
     network_weight: float = Field(default=0.6, ge=0, le=1)
