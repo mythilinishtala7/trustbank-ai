@@ -63,13 +63,13 @@ Open a second terminal at the repo root.
 B=http://localhost:8000/api/v1
 H='content-type: application/json'
 CODE=$(grep '^TRUSTBANK_INVESTIGATOR_CODE=' services/backend/.env | cut -d= -f2)
-tok() { python3 -c 'import sys,json;print(json.load(sys.stdin)["access_token"])'; }
+tok() { python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])'; }
 ```
 
 ### Public
 
 ```bash
-curl -s $B/health      # {"status":"ok","firestore":..,"neo4j":..,"model":{"status":"not_configured"}}
+curl -s $B/health      # {"status":"ok","checks":{"firestore":"ok","neo4j":"ok","model":"unchecked"}}
 curl -s $B/personas    # Asha Menon, Priya Nair
 ```
 
@@ -108,44 +108,40 @@ done; echo                                                                      
 After the 429, wait 60 seconds before logging in as investigator again. Every error body is
 `{"error":{"code","message","requestId"}}`; the same id appears in the server log line.
 
-## 5. Try the anomaly agent (no HTTP endpoint yet)
+## 5. Payment flow (runs the agents)
 
-Run from `services/backend`:
+Needs `$CT` from section 4. Recipient is a UPI id or account number, not a beneficiary id.
+`POST /payments` runs the anomaly and network agents, so it can take 10 to 30 seconds.
 
 ```bash
-.venv/bin/python - <<'E'
-import asyncio
-from datetime import datetime, UTC
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
-from trustbank.agents.anomaly import build_anomaly_agent, STATE_INPUT, STATE_FINDING
-from trustbank.config import get_settings
-from trustbank.store import DatasetRepository, create_client
+P=$(curl -s -XPOST $B/payments -H "Authorization: Bearer $CT" -H "$H" -H "Idempotency-Key: demo-$RANDOM" \
+  -d '{"recipient":"heritage.jewellers@trustpay","amount":40000}')
+echo $P                                  # status QUESTIONNAIRE or PROCEEDING; note the "id"
+ID=$(echo $P | python3 -c 'import sys,json;print(json.load(sys.stdin)["id"])')
+curl -s $B/payments/$ID -H "Authorization: Bearer $CT"
+# answer using the question ids and option values returned above
+curl -s -XPOST $B/payments/$ID/answers -H "Authorization: Bearer $CT" -H "$H" \
+  -d '{"answers":[{"questionId":"source_of_details","option":"messaging_app"}]}'
+curl -s -XPOST $B/payments/$ID/acknowledge -H "Authorization: Bearer $CT"   # review outcome
+curl -s -XPOST $B/payments/$ID/verify      -H "Authorization: Bearer $CT"
+curl -s -XPOST $B/payments/$ID/continue    -H "Authorization: Bearer $CT"
+curl -s -XPOST $B/payments/$ID/authorize   -H "Authorization: Bearer $CT" -H "$H" -d '{"pin":"1234"}'
+curl -s -XPOST $B/payments/$ID/cancel      -H "Authorization: Bearer $CT"
+```
 
-repo = DatasetRepository(create_client(get_settings()))
-CASES = [  # (customer, beneficiary, amount)
-    ("cust_asha", "ben_rahul", 2500),         # about 0
-    ("cust_asha", "ben_heritage", 40000),     # about 90
-    ("cust_priya", "ben_novatrade", 8000),    # about 70, uncapped (65% of balance)
-    ("cust_priya", "ben_sharma_store", 400),  # low, capped, low confidence
-    ("cust_nobody", "ben_rahul", 100),        # FAILED
-]
-async def main():
-    svc = InMemorySessionService()
-    r = Runner(app_name="t", agent=build_anomaly_agent(repo), session_service=svc)
-    for c, b, a in CASES:
-        s = await svc.create_session(app_name="t", user_id="u", state={STATE_INPUT: {
-            "customer_id": c, "beneficiary_id": b, "amount": a,
-            "as_of": datetime.now(UTC).isoformat()}})
-        async for _ in r.run_async(user_id="u", session_id=s.id,
-                new_message=types.Content(role="user", parts=[types.Part(text="go")])): pass
-        f = (await svc.get_session(app_name="t", user_id="u", session_id=s.id)).state[STATE_FINDING]
-        print(c, b, a, "->", f["status"], f["score"], f["confidence"])
-        for e in f["evidence"]: print("   ", e["id"], e["points"], "|", e["summary"])
-        if f["error"]: print("    error:", f["error"])
-asyncio.run(main())
-E
+Which actions are valid comes from the `actions` array of each response; others return 409.
+A held payment cannot be authorised until the server-side hold expires.
+
+Scenarios: Asha to `nova.trade@trustpay` 25000 (network), Priya to `nova.trade@trustpay` 8000,
+Asha to `heritage.jewellers@trustpay` 40000 (anomaly only, never a hold).
+
+Investigator (needs `$IT`):
+
+```bash
+curl -s $B/investigation/transactions -H "Authorization: Bearer $IT"
+curl -s $B/investigation/transactions/$ID -H "Authorization: Bearer $IT"
+curl -s $B/investigation/transactions/$ID/timeline -H "Authorization: Bearer $IT"
+curl -N $B/investigation/transactions/$ID/events -H "Authorization: Bearer $IT"   # SSE
 ```
 
 ## 6. Troubleshooting

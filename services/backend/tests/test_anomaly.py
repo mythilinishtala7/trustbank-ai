@@ -139,7 +139,7 @@ class _Reader:
     def account_for_owner(self, owner_id: str) -> Account:
         return Account(
             id="acct_c", owner_id=owner_id, owner_type=OwnerType.CUSTOMER, opened_at=NOW,
-            masked_number="1234",
+            account_number="500000001234", masked_number="XXXXXXXX1234",
         )  # fmt: skip
 
     def transactions_from_account(self, account_id: str, limit: int = 200) -> list[Transaction]:

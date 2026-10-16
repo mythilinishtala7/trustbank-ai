@@ -37,43 +37,43 @@ Spec: `agent-orchestration`.
 
 - [x] 3.1 Pydantic contracts and validators (schema, evidence grounding, enums).
 - [x] 3.2 Anomaly agent (ADK custom agent) with statistical tools over Firestore history, including low-history confidence handling.
-- [ ] 3.3 Fraud network agent (ADK custom agent) with Cypher tools and corroboration/established-account rules.
-- [ ] 3.4 Questionnaire agent (`LlmAgent`) with structured output, fixed option sets, deterministic answer-to-evidence mapping, free-text classifier, prompt-injection defences.
-- [ ] 3.5 Explainer agent (`LlmAgent`) with grounding validation and template fallback.
-- [ ] 3.6 Orchestrator workflow (parallel detectors, conditional questionnaire), timeouts, failure and degraded handling.
-- [ ] 3.7 Assessment record persistence (append-only) including tool-call trace.
+- [x] 3.3 Fraud network agent (ADK custom agent) with Cypher tools and corroboration/established-account rules.
+- [x] 3.4 Questionnaire agent (`LlmAgent`) with structured output, fixed option sets, deterministic answer-to-evidence mapping, free-text classifier, prompt-injection defences.
+- [x] 3.5 Explainer agent (`LlmAgent`) with grounding validation and template fallback.
+- [x] 3.6 Orchestrator workflow (parallel detectors, conditional questionnaire), timeouts, failure and degraded handling.
+- [x] 3.7 Assessment record persistence (append-only) including tool-call trace.
 - [ ] 3.8 Live Gemini smoke test (manual) on Vertex AI.
 
 ## 4. Slice 4 — Risk policy and payment lifecycle
 
 Spec: `risk-policy`.
 
-- [ ] 4.1 Config object and deterministic aggregation with evidence cap and `INCOMPLETE` handling.
-- [ ] 4.2 Payment state machine with Firestore transactions and idempotency.
-- [ ] 4.3 `/payments` create, get, answers, acknowledge, verify, continue, authorize (dummy PIN), cancel.
-- [ ] 4.4 Server-enforced hold (`HOLD_ACTIVE`/`HOLD_EXPIRED`) with injectable clock.
-- [ ] 4.5 Completion writes: Firestore transaction, balance, Neo4j projection.
+- [x] 4.1 Config object and deterministic aggregation with evidence cap and `INCOMPLETE` handling.
+- [x] 4.2 Payment state machine with Firestore transactions and idempotency.
+- [x] 4.3 `/payments` create, get, answers, acknowledge, verify, continue, authorize (dummy PIN), cancel.
+- [x] 4.4 Server-enforced hold (`HOLD_ACTIVE`/`HOLD_EXPIRED`) with injectable clock.
+- [x] 4.5 Completion writes: Firestore transaction, balance, Neo4j projection.
 
 ## 5. Slice 5 — Customer experience
 
 Spec: `customer-experience`.
 
-- [ ] 5.1 API client, session service, route guards, shared design tokens.
-- [ ] 5.2 Persona entry, minimal home, recent transactions.
-- [ ] 5.3 Recipient, amount, and review screens.
-- [ ] 5.4 Scam-check questions screen.
-- [ ] 5.5 Review acknowledgement and hold screens with server-driven countdown and expiry flow.
-- [ ] 5.6 Demo PIN and receipt; loading/error/empty states; accessibility and responsive pass.
+- [x] 5.1 API client, session service, route guards, shared design tokens.
+- [x] 5.2 Persona entry, minimal home, recent transactions.
+- [x] 5.3 Recipient, amount, and review screens.
+- [x] 5.4 Scam-check questions screen.
+- [x] 5.5 Review acknowledgement and hold screens with server-driven countdown and expiry flow.
+- [x] 5.6 Demo PIN and receipt; loading/error/empty states; accessibility and responsive pass.
 
 ## 6. Slice 6 — Investigation console
 
 Specs: `investigation-console`, `access-control`.
 
-- [ ] 6.1 `/investigation/transactions/{id}` and `/timeline` endpoints with audit log; trace events persisted for every payment.
-- [ ] 6.2 SSE endpoint `/investigation/transactions/{id}/events` with polling fallback.
-- [ ] 6.3 Console shell at `/investigation` with access-code gate and guard.
-- [ ] 6.4 Transaction search, bounded Cytoscape graph with highlights, legend, node details.
-- [ ] 6.5 Live agent timeline, evidence and policy panel with provenance badges.
+- [x] 6.1 `/investigation/transactions/{id}` and `/timeline` endpoints with audit log; trace events persisted for every payment.
+- [x] 6.2 SSE endpoint `/investigation/transactions/{id}/events` with polling fallback.
+- [x] 6.3 Console shell at `/investigation` with access-code gate and guard.
+- [x] 6.4 Transaction search, bounded Cytoscape graph with highlights, legend, node details.
+- [x] 6.5 Live agent timeline, evidence and policy panel with provenance badges.
 - [ ] 6.6 Verify access control manually (including that customer responses expose no internal fields).
 
 ## 7. Slice 7 — Hardening and delivery

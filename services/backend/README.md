@@ -94,7 +94,7 @@ Order: Firestore (source of truth) first, then Neo4j (derived, rebuildable). Bot
 ```bash
 docker compose -f ../../infra/docker-compose.yml up -d          # local Neo4j
 .venv/bin/python -m trustbank.seed --remote project-b63ed173-f777-4777-81a --reset --yes
-.venv/bin/python -m trustbank.ingest --reset --remote-firestore project-b63ed173-f777-4777-81a
+.venv/bin/python -m trustbank.graph.ingest --reset
 # expected: ingested: 22 customers, 15 beneficiaries, 37 accounts, 279 transactions, 2 connections; integrity OK
 ```
 
