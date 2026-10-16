@@ -29,15 +29,11 @@ _BATCH_SIZE = 400  # Firestore allows 500 writes per batch
 
 
 def create_client(settings: Settings) -> firestore.Client:
-    """Build a client. Refuses to run against real Firestore unless deployed."""
+    """Build a client: the emulator when a host is configured, else real Firestore via ADC."""
     if settings.firestore_emulator_host:
         import os
 
         os.environ["FIRESTORE_EMULATOR_HOST"] = settings.firestore_emulator_host
-    elif not settings.is_deployed:
-        raise RuntimeError(
-            "Set TRUSTBANK_FIRESTORE_EMULATOR_HOST (e.g. 127.0.0.1:8085) for local/test runs."
-        )
     return firestore.Client(project=settings.google_cloud_project)
 
 

@@ -6,8 +6,9 @@ Money is whole rupees. Timestamps are timezone-aware (UTC).
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class Provenance(StrEnum):
@@ -34,6 +35,14 @@ class TransactionStatus(StrEnum):
 class _Document(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
+    @field_validator("*", mode="before")
+    @classmethod
+    def _plain_datetime(cls, value: Any) -> Any:
+        # Firestore returns a datetime subclass that the Neo4j driver rejects.
+        if isinstance(value, datetime) and type(value) is not datetime:
+            return datetime.fromisoformat(value.isoformat())
+        return value
+
 
 class Customer(_Document):
     id: str
@@ -55,6 +64,7 @@ class Account(_Document):
     owner_id: str
     owner_type: OwnerType
     opened_at: datetime
+    account_number: str
     masked_number: str
 
 

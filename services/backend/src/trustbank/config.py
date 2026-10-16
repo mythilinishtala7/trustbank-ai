@@ -1,11 +1,12 @@
 from functools import lru_cache
+from typing import Self
 
 from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Validated configuration. Invalid values fail at startup."""
+    """Validated configuration. Invalid or missing required values fail at startup."""
 
     model_config = SettingsConfigDict(
         env_prefix="TRUSTBANK_",
@@ -71,6 +72,10 @@ class Settings(BaseSettings):
     @property
     def is_deployed(self) -> bool:
         return self.environment == "deployed"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
 
 @lru_cache
