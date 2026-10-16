@@ -1,0 +1,167 @@
+<ng-template #item let-e>
+  <li class="evidence" [attr.data-evidence-id]="e.id">
+    <div class="ev-head">
+      <code>{{ e.id }}</code>
+      <inv-prov [value]="e.provenance" />
+      @if (e.points > 0) {
+        <span class="pts">+{{ e.points }} pts</span>
+      } @else {
+        <span class="pts context">context · 0 pts</span>
+      }
+    </div>
+    <p>{{ e.summary }}</p>
+    @if (e.sourceEntityIds.length) {
+      <div class="sources">
+        <span class="inv-muted">Entities:</span>
+        @for (id of e.sourceEntityIds; track id) {
+          <button type="button" class="chip" (click)="entitySelected.emit(id)" [attr.aria-label]="'Show ' + id + ' in graph'">{{ id }}</button>
+        }
+      </div>
+    }
+  </li>
+</ng-template>
+
+<section class="inv-card" aria-labelledby="ev-heading">
+  <h2 id="ev-heading">Evidence and policy</h2>
+
+  @if (historical()) {
+    <p class="inv-empty">Historical seeded transactions have no stored assessments. The graph shows the seeded data around this transaction.</p>
+  } @else if (!current()) {
+    <p class="inv-empty">No assessment has been stored for this payment yet.</p>
+  } @else {
+    @let a = current()!;
+    <div class="tabs" role="tablist" aria-label="Assessment stage">
+      @for (s of assessments(); track s.id) {
+        <button type="button" role="tab" class="tab" [attr.aria-selected]="isCurrent(s)" [attr.tabindex]="isCurrent(s) ? 0 : -1" (click)="choose(s.id)">
+          {{ s.stage }}@if (!s.complete) { <span class="flag">incomplete</span> }
+        </button>
+      }
+    </div>
+
+    <div role="tabpanel">
+      <p class="meta">
+        Stored {{ a.createdAt | date: 'dd MMM yyyy, HH:mm:ss' }} · {{ duration(a.durationMs) }} ·
+        model: <code>{{ a.model || 'none (no model used)' }}</code>
+        @if (!a.complete) { · <strong class="flag">INCOMPLETE: a detector did not finish</strong> }
+      </p>
+
+      <div class="outcome" aria-label="Policy outcome">
+        <div><span class="k">Final score</span><strong class="big">{{ a.aggregate.finalScore }}</strong></div>
+        <div><span class="k">Level</span><span class="pill" [attr.data-level]="a.aggregate.level">{{ a.aggregate.level }}</span></div>
+        <div><span class="k">Policy action</span><span class="pill" [attr.data-action]="a.aggregate.action">{{ a.aggregate.action }}</span></div>
+      </div>
+
+      @if (noContributingEvidence()) {
+        <p class="inv-notice neutral" data-testid="no-suspicious">
+          No evidence contributed points to this score. Items listed as context explain what was observed and why it did not raise the score.
+        </p>
+      }
+
+      <h3>Agent findings</h3>
+      @for (v of views(); track v.finding.agentId) {
+        <article class="finding" [attr.data-agent]="v.finding.agentId">
+          <header>
+            <h4>{{ agentName(v.finding.agentId) }}</h4>
+            <span class="status" [attr.data-status]="v.finding.status">{{ v.finding.status }}</span>
+            <span>Score <strong>{{ v.finding.score }}</strong></span>
+            <span>Confidence <strong>{{ (v.finding.confidence * 100).toFixed(0) }}%</strong></span>
+          </header>
+          @if (v.finding.error) {
+            <p class="inv-notice" role="note">Error: {{ v.finding.error }}</p>
+          }
+          @if (v.contributing.length) {
+            <h5>Evidence contributing to the score</h5>
+            <ul class="evlist">
+              @for (e of v.contributing; track e.id) { <ng-container [ngTemplateOutlet]="item" [ngTemplateOutletContext]="{ $implicit: e }" /> }
+            </ul>
+          }
+          @if (v.context.length) {
+            <h5>Context (0 points)</h5>
+            <ul class="evlist">
+              @for (e of v.context; track e.id) { <ng-container [ngTemplateOutlet]="item" [ngTemplateOutletContext]="{ $implicit: e }" /> }
+            </ul>
+          }
+          @if (!v.contributing.length && !v.context.length) {
+            <p class="inv-muted">This agent returned no evidence.</p>
+          }
+        </article>
+      }
+
+      @if (a.questions.length) {
+        <h3>Questionnaire</h3>
+        <ol class="qa">
+          @for (q of a.questions; track q.id) {
+            <li>
+              <p class="q">{{ q.text }}</p>
+              @for (ans of a.answers; track ans.questionId) {
+                @if (ans.questionId === q.id) {
+                  <p>Answer: <strong>{{ optionLabel(q, ans.option) }}</strong></p>
+                  @if (ans.freeText) {
+                    <blockquote><span class="inv-muted">Customer-provided free text (untrusted):</span> “{{ ans.freeText }}”</blockquote>
+                  }
+                }
+              }
+            </li>
+          }
+        </ol>
+        @if (a.answers.length === 0) { <p class="inv-muted">No answers recorded at this stage.</p> }
+      }
+
+      <h3>Aggregation</h3>
+      <table class="agg">
+        <caption class="inv-sr">Score aggregation and policy configuration</caption>
+        <tbody>
+          <tr><th scope="row">Anomaly score × weight</th><td>{{ a.aggregate.anomalyScore }} × {{ a.config.anomalyWeight }} = {{ weighted()!.anomaly }}</td></tr>
+          <tr><th scope="row">Network score × weight</th><td>{{ a.aggregate.networkScore }} × {{ a.config.networkWeight }} = {{ weighted()!.network }}</td></tr>
+          <tr><th scope="row">Pre-score</th><td>{{ a.aggregate.preScore }}</td></tr>
+          <tr><th scope="row">Context points (cap {{ a.config.contextCap }})</th><td>{{ a.aggregate.contextPoints }}</td></tr>
+          <tr><th scope="row">Final score</th><td><strong>{{ a.aggregate.finalScore }}</strong></td></tr>
+          <tr><th scope="row">Thresholds</th><td>elevated ≥ {{ a.config.elevatedThreshold }}, high ≥ {{ a.config.highThreshold }}</td></tr>
+          <tr><th scope="row">Evidence cap</th><td>final capped at {{ a.config.evidenceCapScore }} unless network evidence exists or context ≥ {{ a.config.evidenceCapContext }}</td></tr>
+          <tr><th scope="row">Hold duration</th><td>{{ a.config.holdSeconds }} s (simulated)</td></tr>
+          <tr><th scope="row">Elevated</th><td>{{ a.aggregate.elevated ? 'Yes (questionnaire invoked)' : 'No' }}</td></tr>
+          <tr><th scope="row">Incomplete</th><td>{{ a.aggregate.incomplete ? 'Yes (never LOW; routed to review)' : 'No' }}</td></tr>
+          <tr><th scope="row">Evidence cap applied</th><td>{{ a.aggregate.evidenceCapApplied ? 'Yes: score limited because there was no network evidence' : 'No' }}</td></tr>
+          <tr><th scope="row">Level / action</th><td>{{ a.aggregate.level }} → {{ a.aggregate.action }}</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Customer-facing explanation</h3>
+      @if (a.explanation; as ex) {
+        <div class="explanation" [attr.data-status]="ex.status">
+          @if (ex.status === 'DEGRADED') {
+            <span class="status" data-status="DEGRADED">DEGRADED · template explanation, model output not used</span>
+          }
+          <blockquote>{{ ex.text }}</blockquote>
+          @if (ex.reasons.length) {
+            <ul>
+              @for (r of ex.reasons; track r) { <li>{{ r }}</li> }
+            </ul>
+          }
+          @if (ex.evidenceIds.length) {
+            <p class="inv-muted">Cites evidence: @for (id of ex.evidenceIds; track id) { <code>{{ id }}</code>{{ $last ? '' : ', ' }} }</p>
+          }
+        </div>
+      } @else {
+        <p class="inv-muted">No explanation was shown to the customer at this stage.</p>
+      }
+
+      @if (a.toolCalls.length) {
+        <details class="tools">
+          <summary>Recorded tool calls ({{ a.toolCalls.length }})</summary>
+          <ul>
+            @for (t of a.toolCalls; track $index) {
+              <li>
+                <strong>{{ agentName(t.agentId) }}</strong> · <code>{{ t.tool }}</code> · {{ duration(t.durationMs) }}
+                <div class="inv-muted">
+                  @for (p of entries(t.parameters); track p.key) { {{ p.key }}={{ p.value }}{{ $last ? '' : ', ' }} }
+                </div>
+                <div>{{ t.resultSummary }}</div>
+              </li>
+            }
+          </ul>
+        </details>
+      }
+    </div>
+  }
+</section>

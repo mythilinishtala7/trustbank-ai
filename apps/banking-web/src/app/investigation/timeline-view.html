@@ -1,0 +1,79 @@
+<section class="inv-card" aria-labelledby="tl-heading">
+  <header>
+    <h2 id="tl-heading">Agent execution timeline</h2>
+    <span class="mode" [attr.data-mode]="mode()" role="status">
+      <span class="dot" aria-hidden="true"></span>{{ modeLabel() }}
+    </span>
+  </header>
+
+  @if (error()) {
+    <p class="inv-notice" role="alert">{{ error() }}</p>
+  }
+
+  @if (historical()) {
+    <p class="inv-empty">Historical seeded transactions were not assessed by agents, so there is no execution trace.</p>
+  } @else if (ordered().length === 0) {
+    <p class="inv-empty">No trace events recorded yet.</p>
+  } @else {
+    <table class="runs">
+      <caption class="inv-sr">Per-agent runs</caption>
+      <thead>
+        <tr><th scope="col">Agent</th><th scope="col">Started</th><th scope="col">Ended</th><th scope="col">Status</th><th scope="col">Duration</th></tr>
+      </thead>
+      <tbody>
+        @for (r of runs(); track r.agentId) {
+          <tr>
+            <th scope="row">{{ agentName(r.agentId) }}</th>
+            <td>{{ r.startedAt ? (r.startedAt | date: 'HH:mm:ss') : '—' }}</td>
+            <td>{{ r.endedAt ? (r.endedAt | date: 'HH:mm:ss') : '—' }}</td>
+            <td><span class="status" [attr.data-status]="r.status">{{ r.status }}</span></td>
+            <td>{{ duration(r.durationMs) || '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <ol class="events" aria-label="Trace events in order" aria-live="polite">
+      @for (e of ordered(); track e.seq) {
+        <li class="ev" [attr.data-severity]="severity(e)" [attr.data-type]="e.type">
+          <div class="head">
+            <span class="seq">#{{ e.seq }}</span>
+            <strong>{{ agentName(e.agentId) }}</strong>
+            <span class="type">{{ e.type.replace('_', ' ') }}</span>
+            @if (e.status) {
+              <span class="status" [attr.data-status]="e.status">{{ e.status }}</span>
+            }
+            @if (severity(e) === 'degraded') {
+              <span class="status" data-status="DEGRADED">Fallback / degraded</span>
+            }
+            <time class="when" [attr.datetime]="e.at">{{ e.at | date: 'HH:mm:ss' }}</time>
+            @if (e.durationMs !== null) {
+              <span class="dur">{{ duration(e.durationMs) }}</span>
+            }
+          </div>
+          @if (e.message) {
+            <p class="msg">{{ e.message }}</p>
+          }
+          @if (e.tool) {
+            <div class="tool">
+              <div><span class="k">Tool</span> <code>{{ e.tool }}</code></div>
+              @if (entries(e.parameters).length) {
+                <dl class="params">
+                  @for (p of entries(e.parameters); track p.key) {
+                    <dt>{{ p.key }}</dt>
+                    <dd>{{ p.value }}</dd>
+                  }
+                </dl>
+              }
+              @if (e.resultSummary) {
+                <div class="result"><span class="k">Result</span> {{ e.resultSummary }}</div>
+              }
+            </div>
+          } @else if (e.resultSummary) {
+            <div class="result"><span class="k">Result</span> {{ e.resultSummary }}</div>
+          }
+        </li>
+      }
+    </ol>
+  }
+</section>

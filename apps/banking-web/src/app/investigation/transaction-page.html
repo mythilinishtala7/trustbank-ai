@@ -1,0 +1,64 @@
+<h1>Transaction <code>{{ id() }}</code></h1>
+
+<section class="inv-card">
+  <inv-search-form [initial]="id()" />
+</section>
+
+@switch (state()) {
+  @case ('loading') {
+    <p class="inv-card" role="status">Loading transaction…</p>
+  }
+  @case ('not-found') {
+    <section class="inv-card" role="alert" data-testid="not-found">
+      <h2>Transaction not found</h2>
+      <p>No payment or historical transaction matches <code>{{ id() }}</code>. Check the reference and try again.</p>
+    </section>
+  }
+  @case ('forbidden') {
+    <section class="inv-card" role="alert" data-testid="forbidden">
+      <h2>No access</h2>
+      <p>{{ message() }}</p>
+    </section>
+  }
+  @case ('unavailable') {
+    <section class="inv-card" role="alert" data-testid="unavailable">
+      <h2>Service unavailable</h2>
+      <p>{{ message() }}</p>
+      <button type="button" class="inv-btn primary" (click)="load()">Retry</button>
+    </section>
+  }
+  @case ('error') {
+    <section class="inv-card" role="alert" data-testid="error">
+      <h2>Could not load transaction</h2>
+      <p>{{ message() }}</p>
+      <button type="button" class="inv-btn primary" (click)="load()">Retry</button>
+    </section>
+  }
+  @case ('ready') {
+    @let d = detail()!;
+    <section class="inv-card summary" aria-labelledby="summary-heading">
+      <h2 id="summary-heading">Summary <span class="kind">{{ d.kind === 'PAYMENT' ? 'Payment' : 'Historical transaction' }}</span></h2>
+      <dl>
+        <div><dt>Customer</dt><dd>{{ d.summary.customerName }} <code>{{ d.summary.customerId }}</code></dd></div>
+        <div><dt>Recipient</dt><dd>{{ d.summary.recipientName }} <code>{{ d.summary.recipientId }}</code></dd></div>
+        <div><dt>Amount</dt><dd>{{ d.summary.amount | currency: 'INR' : 'symbol' : '1.0-0' }}</dd></div>
+        <div><dt>Time</dt><dd>{{ d.summary.timestamp | date: 'dd MMM yyyy, HH:mm:ss' }}</dd></div>
+        <div>
+          <dt>Status</dt>
+          <dd data-testid="status">{{ liveStatus() }}@if (inFlight()) { <span class="live">in progress</span> }</dd>
+        </div>
+        @if (d.summary.note) {
+          <div><dt>Customer note</dt><dd>“{{ d.summary.note }}”</dd></div>
+        }
+      </dl>
+      <p class="inv-muted">Simulated demo data. Nothing here is a real payment, account, or customer.</p>
+    </section>
+
+    <inv-graph [graph]="d.graph" [evidenceIndex]="evidenceIndex()" [focusId]="focusId()" />
+
+    <div class="columns">
+      <inv-evidence-panel [assessments]="d.assessments" [historical]="historical()" (entitySelected)="focusId.set($event)" />
+      <inv-timeline [events]="feed.events()" [mode]="feed.mode()" [error]="feed.error()" [historical]="historical()" />
+    </div>
+  }
+}

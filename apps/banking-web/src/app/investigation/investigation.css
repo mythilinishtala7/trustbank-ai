@@ -1,0 +1,33 @@
+.inv-shell { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg, #f4f6f9); color: var(--navy, #0b1f3a); font-size: 14px; line-height: 1.5; }
+.inv-top { display: flex; align-items: center; gap: 16px; padding: 10px 24px; background: var(--navy-deep, #0b1f3a); color: #fff; border-bottom: 1px solid var(--line, #243350); }
+.inv-brand { color: #fff; font-weight: 700; font-size: 17px; text-decoration: none; }
+.inv-brand span { font-weight: 400; color: #b9c4d6; margin-left: 6px; }
+.inv-sim { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: #fff; }
+.inv-spacer { flex: 1; }
+.inv-main { flex: 1; width: 100%; max-width: 1360px; margin: 0 auto; padding: 20px 24px 40px; }
+.inv-foot { padding: 12px 24px; font-size: 12px; color: var(--muted, #5d6b82); border-top: 1px solid var(--line, #e2e7ef); background: var(--surface-raise, #182741); }
+.inv-main h1 { font-size: 22px; margin: 0 0 12px; }
+
+.inv-card { background: var(--surface, #fff); border: 1px solid var(--line, #e2e7ef); border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(11, 31, 58, 0.05), 0 8px 24px rgba(11, 31, 58, 0.05); }
+.inv-muted { color: var(--muted, #5d6b82); font-size: 13px; margin: 0 0 6px; }
+.inv-empty { color: var(--muted, #5d6b82); margin: 8px 0; }
+.inv-notice { background: var(--amber-soft, #faf1da); border: 1px solid #ead9a8; border-radius: 8px; padding: 8px 12px; margin: 8px 0; font-size: 13px; }
+.inv-notice.neutral { background: var(--blue-soft, #edf2fd); border-color: #ccd9f6; }
+.inv-error { color: var(--danger, #c81e1e); font-size: 13px; margin: 6px 0; }
+.inv-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.inv-shell label { display: block; font-weight: 600; margin: 8px 0 6px; }
+.inv-shell input[type='text'], .inv-shell input[type='password'] { width: 100%; padding: 10px 12px; font: inherit; border: 1px solid var(--line, #e2e7ef); border-radius: 8px; background: var(--surface-raise, #182741); color: inherit; }
+.inv-shell input:focus-visible, .inv-shell button:focus-visible, .inv-shell a:focus-visible, .inv-shell summary:focus-visible { outline: 3px solid #9db9f5; outline-offset: 1px; }
+.inv-btn { font: inherit; font-weight: 600; padding: 9px 16px; border: 1px solid var(--line, #e2e7ef); border-radius: 8px; background: var(--surface-raise, #182741); color: var(--navy, #0b1f3a); cursor: pointer; }
+.inv-btn.primary { background: var(--blue, #2f5de1); border-color: var(--blue, #2f5de1); color: #fff; }
+.inv-btn.small { padding: 5px 12px; font-size: 13px; }
+.inv-btn[aria-pressed='true'] { background: var(--blue-soft, #edf2fd); border-color: var(--blue, #2f5de1); }
+.inv-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.inv-top .inv-btn { background: transparent; color: #fff; border-color: rgba(255, 255, 255, 0.5); }
+
+.inv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.inv-table th, .inv-table td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line, #e2e7ef); font-weight: 400; }
+.inv-table thead th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted, #5d6b82); font-weight: 600; }
+.inv-table tbody th { font-weight: 600; }
+.inv-shell code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }

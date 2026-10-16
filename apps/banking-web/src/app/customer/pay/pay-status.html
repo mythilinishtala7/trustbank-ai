@@ -1,0 +1,170 @@
+<div class="phone">
+  @if (payment(); as p) {
+    <h1 [appFocusHeading]="p.status">{{ title() }}</h1>
+
+    @switch (p.status) {
+      @case ('INITIATED') {
+        <ng-container *ngTemplateOutlet="assessing" />
+      }
+      @case ('ASSESSING') {
+        <ng-container *ngTemplateOutlet="assessing" />
+      }
+
+      @case ('QUESTIONNAIRE') {
+        @if (p.explanation || p.reasons.length) {
+          <app-explanation [payment]="p" tone="neutral" heading="Why we're asking" />
+        }
+        @if (can('ANSWER')) {
+          <app-questionnaire [payment]="p" [busy]="busy()" (answered)="submitAnswers($event)" />
+        }
+        <ng-container *ngTemplateOutlet="cancelButton" />
+      }
+
+      @case ('REVIEW') {
+        <ng-container *ngTemplateOutlet="summary" />
+        <app-explanation [payment]="p" tone="caution" heading="Why we're asking you to double-check" />
+        @if (can('ACKNOWLEDGE')) {
+          <div class="card">
+            <label class="ack">
+              <input type="checkbox" [checked]="acknowledged()" (change)="acknowledged.set($any($event.target).checked)" />
+              I have read this and want to continue with this payment.
+            </label>
+            <button type="button" class="btn" [disabled]="!acknowledged() || busy()" (click)="acknowledge()">{{ busy() ? 'Please wait…' : 'Continue' }}</button>
+          </div>
+        }
+        <ng-container *ngTemplateOutlet="cancelButton" />
+      }
+
+      @case ('HOLD_ACTIVE') {
+        <ng-container *ngTemplateOutlet="summary" />
+        <app-explanation [payment]="p" tone="high" heading="Why this payment is paused" />
+        <section class="card">
+          <app-hold-countdown [payment]="p" (ended)="onHoldEnded()" />
+          <p class="muted small center">You can't continue until the pause ends.</p>
+        </section>
+        <ng-container *ngTemplateOutlet="verifyGuidance" />
+        <ng-container *ngTemplateOutlet="reference" />
+        @if (can('CANCEL')) {
+          <button type="button" class="btn" [disabled]="busy()" (click)="cancel()">Cancel payment</button>
+        }
+        <ng-container *ngTemplateOutlet="simNote" />
+      }
+
+      @case ('HOLD_EXPIRED') {
+        <ng-container *ngTemplateOutlet="summary" />
+        <app-explanation [payment]="p" tone="caution" heading="Why this payment was paused" />
+        <ng-container *ngTemplateOutlet="verifyGuidance" />
+        <ng-container *ngTemplateOutlet="reference" />
+        @if (can('VERIFY')) {
+          <button type="button" class="btn" [disabled]="busy()" (click)="verify()">I verified the recipient independently</button>
+        }
+        @if (can('CONTINUE')) {
+          <p class="muted small">You confirmed that you verified the recipient independently.</p>
+          <button type="button" class="btn" [disabled]="busy()" (click)="proceed()">Continue</button>
+        }
+        <ng-container *ngTemplateOutlet="cancelButton" />
+        <ng-container *ngTemplateOutlet="simNote" />
+      }
+
+      @case ('READY_FOR_AUTH') {
+        <ng-container *ngTemplateOutlet="summary" />
+        @if (can('AUTHORIZE')) {
+          <app-pin-entry [busy]="busy()" (authorized)="authorize($event)" />
+        }
+        <ng-container *ngTemplateOutlet="cancelButton" />
+        <ng-container *ngTemplateOutlet="simNote" />
+      }
+
+      @case ('COMPLETED') {
+        <section class="card" aria-label="Receipt">
+          <span class="receipt-mark" aria-hidden="true">✓</span>
+          <h2>Payment sent</h2>
+          <p class="receipt-badge">Simulated payment — no real money moved</p>
+          <dl class="receipt">
+            <dt>To</dt>
+            <dd>{{ p.recipient.displayName ?? 'Unverified recipient' }}<br /><span class="muted small">{{ p.recipient.handle }}</span></dd>
+            <dt>Amount</dt>
+            <dd>{{ p.amount | currency: 'INR' : 'symbol' : '1.0-0' }}</dd>
+            @if (p.note) {
+              <dt>Note</dt>
+              <dd>{{ p.note }}</dd>
+            }
+            <dt>Payment reference</dt>
+            <dd class="ref">{{ p.id }}</dd>
+            <dt>Created</dt>
+            <dd>{{ p.createdAt | date: 'd MMM y, h:mm a' }}</dd>
+          </dl>
+        </section>
+        <a class="btn" routerLink="/">Back to home</a>
+        <ng-container *ngTemplateOutlet="simNote" />
+      }
+
+      @case ('CANCELLED') {
+        <section class="card">
+          <p>This payment was cancelled. No money was moved.</p>
+          <p class="muted small">Payment reference: <span class="ref">{{ p.id }}</span></p>
+        </section>
+        <a class="btn" routerLink="/">Back to home</a>
+        <ng-container *ngTemplateOutlet="simNote" />
+      }
+    }
+
+    @if (actionError(); as e) {
+      <app-error-panel [error]="e" [retryable]="false" />
+    }
+
+    <ng-template #assessing>
+      <section class="card busy" role="status">
+        <span class="spinner" aria-hidden="true"></span>
+        <div>
+          <b>Checking payment…</b>
+          <p class="muted small">This can take up to 20 seconds. You don't need to do anything.</p>
+        </div>
+      </section>
+      <ng-container *ngTemplateOutlet="cancelButton" />
+    </ng-template>
+
+    <ng-template #summary>
+      <section class="card summary" aria-label="Payment summary">
+        <div>
+          <span class="muted small">To</span>
+          <b>{{ p.recipient.displayName ?? 'Unverified recipient' }}</b>
+          <span class="muted small">{{ p.recipient.handle }}</span>
+        </div>
+        <b class="amt">{{ p.amount | currency: 'INR' : 'symbol' : '1.0-0' }}</b>
+      </section>
+    </ng-template>
+
+    <ng-template #verifyGuidance>
+      <section class="card" aria-labelledby="verify-title">
+        <h2 id="verify-title">Verify the recipient independently</h2>
+        <ul class="guidance">
+          <li>Contact the recipient using a phone number or channel you already trust, not one given to you in the request for this payment.</li>
+          <li>Be careful if you were asked to hurry or to keep this payment secret.</li>
+          <li>Never share your PIN or one-time codes with anyone.</li>
+        </ul>
+      </section>
+    </ng-template>
+
+    <ng-template #reference>
+      <p class="muted small center">Payment reference: <span class="ref">{{ p.id }}</span></p>
+    </ng-template>
+
+    <ng-template #cancelButton>
+      @if (can('CANCEL')) {
+        <button type="button" class="btn secondary" [disabled]="busy()" (click)="cancel()">Cancel payment</button>
+      }
+    </ng-template>
+
+    <ng-template #simNote>
+      <p class="simnote">Simulated — hold and authorization are not enforced by a real bank or payment network.</p>
+    </ng-template>
+  } @else if (loadError(); as e) {
+    <h1 [appFocusHeading]="'error'">Payment</h1>
+    <app-error-panel [error]="e" (retry)="refetch()" />
+    <a class="btn secondary" routerLink="/">Back to home</a>
+  } @else {
+    <h1 [appFocusHeading]="'loading'">Payment</h1>
+    <p class="muted" role="status">Loading payment…</p>
+  }
+</div>

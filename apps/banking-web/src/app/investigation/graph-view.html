@@ -1,0 +1,134 @@
+<section class="inv-card" aria-labelledby="graph-heading">
+  <header>
+    <div>
+      <h2 id="graph-heading">Transaction neighbourhood</h2>
+      <p class="inv-muted">
+        Bounded view around this transaction only. Connections and signals are evidence to investigate, not proof.
+      </p>
+    </div>
+    <div class="tools" role="toolbar" aria-label="Graph controls">
+      <button type="button" class="inv-btn small" (click)="zoomBy(1.25)" aria-label="Zoom in">+</button>
+      <button type="button" class="inv-btn small" (click)="zoomBy(0.8)" aria-label="Zoom out">−</button>
+      <button type="button" class="inv-btn small" (click)="fit()">Fit</button>
+      <button type="button" class="inv-btn small" [attr.aria-pressed]="layoutMode() === 'flow'" (click)="setLayout('flow')">Flow</button>
+      <button type="button" class="inv-btn small" [attr.aria-pressed]="layoutMode() === 'cluster'" (click)="setLayout('cluster')">Cluster</button>
+    </div>
+  </header>
+
+  @if (graph().truncated) {
+    <p class="inv-notice" role="status" data-testid="truncated">
+      This neighbourhood was truncated by the server limit. Only part of the surrounding network is shown.
+    </p>
+  }
+
+  @if (graph().nodes.length === 0) {
+    <p class="inv-empty">No graph entities were returned for this transaction.</p>
+  } @else {
+    <div class="layout">
+      <div class="canvas-wrap">
+        <div
+          #canvas
+          class="canvas"
+          tabindex="0"
+          role="application"
+          aria-label="Transaction neighbourhood graph. Arrow keys pan, plus and minus zoom, zero fits to view. A list of entities follows the graph."
+          aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown + - 0"
+          (keydown)="onKey($event)"
+        ></div>
+
+        <ul class="legend" aria-label="Legend">
+          @for (l of labels; track l) {
+            <li><i class="shape" [attr.data-shape]="nodeStyle[l].shape" [style.background]="nodeStyle[l].fill" [style.border-color]="nodeStyle[l].border"></i>{{ l }}</li>
+          }
+          <li><i class="line solid"></i>OWNS / SENT / PAID</li>
+          <li><i class="line dashed"></i>CONNECTED_TO · verified synthetic</li>
+          <li><i class="line dotted"></i>Inferred link</li>
+          <li><i class="hl"></i>Evidence highlighted ({{ highlightedCount() }})</li>
+        </ul>
+
+        <details class="entity-list">
+          <summary>Entity list ({{ graph().nodes.length }} nodes, {{ graph().edges.length }} edges)</summary>
+          <div class="lists">
+            <ul aria-label="Nodes">
+              @for (n of graph().nodes; track n.id) {
+                <li>
+                  <button type="button" class="link" [attr.aria-pressed]="selectedNode()?.id === n.id" (click)="selectNode(n.id, true)">
+                    {{ n.label }}: {{ nodeLabel(n) }}
+                  </button>
+                  @if (n.highlighted) { <span class="hl-tag">evidence</span> }
+                </li>
+              }
+            </ul>
+            <ul aria-label="Edges">
+              @for (e of graph().edges; track e.id) {
+                <li>
+                  <button type="button" class="link" [attr.aria-pressed]="selectedEdge()?.id === e.id" (click)="selectEdge(e.id)">
+                    {{ edgeLabel(e) }}: {{ nodeById().get(e.source)?.name || e.source }} → {{ nodeById().get(e.target)?.name || e.target }}
+                  </button>
+                  @if (e.highlighted) { <span class="hl-tag">evidence</span> }
+                </li>
+              }
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <aside class="detail" aria-label="Selected entity details" aria-live="polite">
+        @if (selectedNode(); as n) {
+          <h3>{{ n.label }}: {{ nodeLabel(n) }}</h3>
+          <dl>
+            <dt>Id</dt><dd><code>{{ n.id }}</code></dd>
+            <dt>Type</dt><dd>{{ n.label }}</dd>
+            @if (n.highlighted) { <dt>Role</dt><dd>Highlighted as evidence by the assessment</dd> }
+          </dl>
+          @if (entries(n.properties).length) {
+            <h4>Properties</h4>
+            <dl class="props">
+              @for (p of entries(n.properties); track p.key) { <dt>{{ p.key }}</dt><dd>{{ p.value }}</dd> }
+            </dl>
+          }
+        } @else if (selectedEdge(); as e) {
+          <h3>{{ edgeLabel(e) }}</h3>
+          <dl>
+            <dt>Id</dt><dd><code>{{ e.id }}</code></dd>
+            <dt>Type</dt><dd>{{ e.type }}</dd>
+            @if (e.kind) { <dt>Kind</dt><dd>{{ e.kind }}</dd> }
+            <dt>From</dt><dd>{{ endpointName(e.source) }}</dd>
+            <dt>To</dt><dd>{{ endpointName(e.target) }}</dd>
+            <dt>Provenance</dt>
+            <dd>
+              @if (e.provenance) { <inv-prov [value]="e.provenance" /> } @else { <span class="inv-muted">None (structural relationship)</span> }
+            </dd>
+            @if (e.highlighted) { <dt>Role</dt><dd>Highlighted as evidence by the assessment</dd> }
+          </dl>
+          @if (e.type === 'CONNECTED_TO' || e.type === 'FLAGGED_FOR') {
+            <p class="inv-muted">A declared connection or derived signal: evidence to investigate, not proof of wrongdoing.</p>
+          }
+        } @else {
+          <p class="inv-muted">Select a node or edge to see its details and the evidence that references it.</p>
+        }
+
+        @if (selection()) {
+          <h4>Evidence referencing this {{ selection()!.kind }}</h4>
+          @if (selectedEvidence().length === 0) {
+            <p class="inv-muted">No assessment evidence references this {{ selection()!.kind }}.</p>
+          } @else {
+            <ul class="ev-list">
+              @for (r of selectedEvidence(); track $index) {
+                <li>
+                  <div class="ev-head">
+                    <code>{{ r.evidence.id }}</code>
+                    <inv-prov [value]="r.evidence.provenance" />
+                    <span class="pts">{{ r.evidence.points > 0 ? '+' + r.evidence.points + ' pts' : 'context' }}</span>
+                  </div>
+                  <p>{{ r.evidence.summary }}</p>
+                  <span class="inv-muted">{{ r.stage }} · {{ r.agentId }}</span>
+                </li>
+              }
+            </ul>
+          }
+        }
+      </aside>
+    </div>
+  }
+</section>
