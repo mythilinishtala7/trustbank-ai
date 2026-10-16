@@ -14,6 +14,7 @@ from trustbank.domain import (
     Connection,
     Customer,
     Dataset,
+    OwnerType,
     Transaction,
 )
 
@@ -52,6 +53,10 @@ def _chunks[T](items: Sequence[T], size: int) -> Iterator[Sequence[T]]:
 class DatasetRepository:
     def __init__(self, client: firestore.Client) -> None:
         self._db = client
+
+    @property
+    def client(self) -> firestore.Client:
+        return self._db
 
     def seed(self, dataset: Dataset) -> dict[str, int]:
         """Idempotent upsert keyed by deterministic ids. Returns counts written per collection."""
@@ -117,3 +122,42 @@ class DatasetRepository:
             .limit(limit)
         )
         return [Transaction.model_validate(d.to_dict()) for d in query.stream()]
+
+    def beneficiary_by_handle(self, handle: str) -> Beneficiary | None:
+        query = (
+            self._db.collection(BENEFICIARIES)
+            .where(filter=FieldFilter("handle", "==", handle.lower()))
+            .limit(1)
+        )
+        docs = list(query.stream())
+        return Beneficiary.model_validate(docs[0].to_dict()) if docs else None
+
+    def beneficiaries_by_account_suffix(self, suffix: str) -> list[tuple[Beneficiary, Account]]:
+        """Beneficiaries whose masked account number ends with `suffix` (only the tail is kept)."""
+        query = self._db.collection(ACCOUNTS).where(
+            filter=FieldFilter("owner_type", "==", OwnerType.BENEFICIARY.value)
+        )
+        matches: list[tuple[Beneficiary, Account]] = []
+        for doc in query.stream():
+            account = Account.model_validate(doc.to_dict())
+            if account.masked_number.endswith(suffix):
+                beneficiary = self.get_beneficiary(account.owner_id)
+                if beneficiary:
+                    matches.append((beneficiary, account))
+        return matches
+
+    def get_transaction(self, transaction_id: str) -> Transaction | None:
+        snap = self._db.collection(TRANSACTIONS).document(transaction_id).get()
+        return Transaction.model_validate(snap.to_dict()) if snap.exists else None
+
+    def get_account(self, account_id: str) -> Account | None:
+        snap = self._db.collection(ACCOUNTS).document(account_id).get()
+        return Account.model_validate(snap.to_dict()) if snap.exists else None
+
+    def demo_personas(self) -> list[Customer]:
+        query = self._db.collection(CUSTOMERS).where(
+            filter=FieldFilter("is_demo_persona", "==", True)
+        )
+        return sorted(
+            (Customer.model_validate(d.to_dict()) for d in query.stream()), key=lambda c: c.id
+        )
