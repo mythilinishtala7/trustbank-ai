@@ -45,7 +45,9 @@ substitutions. Commands below use Secret Manager references.
 | Neo4j runtime access | Complete | After rotating the Neo4j password secret and creating a new Cloud Run revision, deployed `/health` reports `neo4j: ok`. |
 | Synthetic graph ingestion | Complete | Reset and ingestion completed with integrity checks: 22 customers, 15 beneficiaries, 37 accounts, 279 transactions, and 2 declared connections. |
 | Gemini API-key configuration | Complete | Revision `trustbank-api-00004-4tl` injects `GOOGLE_API_KEY` from Secret Manager and sets `GOOGLE_GENAI_USE_VERTEXAI=FALSE`. |
-| Gemini model health | Not checked | `/health` reports `model: unchecked`; complete live Gemini smoke check before demo sign-off. |
+| Gemini model health | Complete | `/health` reports `model: unchecked` by design. A live S8 payment through `https://trustbank-pausepay.web.app/api/v1` on 2026-10-17 ran the questionnaire and explainer on `gemini-3.8-flash` with no fallbacks and reached `HOLD_ACTIVE`. |
+| Web hosting | Complete | Firebase Hosting site `trustbank-pausepay` serves the Angular app at `https://trustbank-pausepay.web.app` and rewrites `/api/**` to Cloud Run. |
+| Neo4j hosting decision | Decided | Self-hosted Neo4j 5 Community on a private GCE VM (`trustbank-neo4j`), reached from Cloud Run over a VPC connector; no public port. Chosen over AuraDB to keep data in-project and cost near US$25-30 a month. Stop the VM when idle. |
 
 ## Checkpoint 0: local readiness
 
@@ -94,11 +96,7 @@ curl --fail http://127.0.0.1:8080/health
 - All non-live backend tests pass.
 - Container starts and `/health` returns HTTP 200.
 
-**Current known blockers:** Restaurant graph-flow coverage was removed at request and is tracked
-for restoration in OpenSpec task 1.7. The latest suite run has three unrelated failures in
-`tests/test_anomaly.py`: its test `Account` fixture is rejected by model validation before the
-intended failure, timeout, and tool-recording assertions run. Resolve those fixture failures
-before publishing an image.
+**Current status:** The backend suite passes (113 tests with Neo4j running; Firestore-emulator tests skip when the emulator is down). Restaurant graph-flow coverage is still tracked in OpenSpec task 1.7.
 
 Stop the local container with `Ctrl-C`.
 

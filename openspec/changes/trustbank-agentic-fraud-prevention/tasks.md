@@ -81,7 +81,7 @@ Specs: `investigation-console`, `access-control`.
 Spec: `integration-testing`.
 
 - [x] 7.1 Full scenario end-to-end run including model misbehavior cases and the "delay the forwarding transactions lowers the result" proof.
-- [ ] 7.2 Container image and Cloud Run deployment; Secret Manager for credentials; Neo4j hosting decision documented.
+- [x] 7.2 Container image and Cloud Run deployment; Secret Manager for credentials; Neo4j hosting decision documented.
 - [ ] 7.3 Remove the superseded TypeScript `services/fraud-api` and `services/agents` after parity; update README and demo script.
 - [ ] 7.4 Mobile/desktop visual pass and accessibility audit.
 
