@@ -58,7 +58,7 @@ LLM agents use structured output schemas, receive only structured evidence (neve
 3. `Assessment`, `Payment`, state machine (`specs/risk-policy`).
 4. REST API and error format (`specs/backend-api`).
 
-Implement them as Pydantic models with an exported OpenAPI document; the Angular models are generated or mirrored from it.
+Implement them as Pydantic models with an exported OpenAPI document; the Angular models are **mirrored by hand** from it (decision, task 0.4). `services/backend/openapi.json` is the committed contract and `test_openapi.py` fails if it drifts from the code; customer models in `apps/banking-web/src/app/core/models.ts` deliberately omit scores, agent names, graph data and traces, so they are a whitelist rather than a full generated client.
 
 ## Risk policy summary (defaults, configurable)
 

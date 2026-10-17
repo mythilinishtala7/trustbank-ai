@@ -19,18 +19,41 @@ from trustbank.domain import (
 )
 
 SHOPPER_NAMES = (
-    "Anil K.", "Bhavna S.", "Chetan R.", "Deepa M.", "Esha P.", "Farhan Q.",
-    "Gita N.", "Harsh V.", "Isha D.", "Jatin L.", "Kavya T.", "Lalit G.",
-)  # fmt: skip
+    "Anil K.",
+    "Bhavna S.",
+    "Chetan R.",
+    "Deepa M.",
+    "Esha P.",
+    "Farhan Q.",
+    "Gita N.",
+    "Harsh V.",
+    "Isha D.",
+    "Jatin L.",
+    "Kavya T.",
+    "Lalit G.",
+)
 PAYER_NAMES = (
-    "Karan S.", "Meera P.", "Imran K.", "Divya R.", "Rohit M.", "Sana A.", "Vikram T.", "Neha B.",
-)  # fmt: skip
+    "Karan S.",
+    "Meera P.",
+    "Imran K.",
+    "Divya R.",
+    "Rohit M.",
+    "Sana A.",
+    "Vikram T.",
+    "Neha B.",
+)
 
 # Inbound payments into the entry account of the forwarding chain: (amount, hours ago).
 CHAIN_INBOUND = (
-    (8_000, 70), (12_000, 60), (5_000, 50), (9_500, 41),
-    (6_000, 30), (15_000, 22), (7_000, 12), (11_000, 5),
-)  # fmt: skip
+    (8_000, 70),
+    (12_000, 60),
+    (5_000, 50),
+    (9_500, 41),
+    (6_000, 30),
+    (15_000, 22),
+    (7_000, 12),
+    (11_000, 5),
+)
 CHAIN_ACCOUNTS = ("ben_novatrade", "ben_quickreturns", "ben_taskrewards", "ben_swiftassist")
 CHAIN_GAPS_MINUTES = (6, 4, 5)
 CHAIN_PERCENT_OF_INBOUND = (98, 97, 96)
@@ -136,9 +159,13 @@ def _people(b: _Builder) -> None:
     b.customer("cust_asha", "Asha Menon", 500_000, 400, "asha.menon@trustpay", persona=True)
     b.customer("cust_priya", "Priya Nair", 12_400, 120, "priya.nair@trustpay", persona=True)
     b.customer(
-        "cust_dmart", "DMart Groceries Pvt Ltd", 2_500_458, 1_800, "dmart.groceries@trustpay",
+        "cust_dmart",
+        "DMart Groceries Pvt Ltd",
+        2_500_458,
+        1_800,
+        "dmart.groceries@trustpay",
         persona=True,
-    )  # fmt: skip
+    )
     for i, name in enumerate(SHOPPER_NAMES, start=1):
         cid = f"cust_s{i:02d}"
         b.customer(cid, name, 0, 300, f"{cid[5:]}@trustpay")
@@ -247,7 +274,6 @@ def _small_merchants(b: _Builder) -> None:
 
 
 def _restaurant(b: _Builder) -> None:
-    # TODO: Restore graph-flow coverage after reconciling intended restaurant dwell range.
     slots = ((12, 30), (15, 30), (20, 0))
     for day in range(1, 21):
         total = 0
@@ -275,56 +301,109 @@ def _restaurant(b: _Builder) -> None:
 
 
 def _dmart(b: _Builder) -> None:
-    """A business customer with big-ticket (suppliers, rent, tax, payroll) and small-ticket spend."""
+    """A business customer: big-ticket (suppliers, rent, tax, payroll) and small-ticket spend."""
     src = "cust_dmart"
     for d in range(1, 91):
         for slot in range(3):
             i = (d - 1) * 3 + slot + 1
             b.txn(
-                f"txn_dm_sale_{i}", _shopper(i), "ben_dmart_sales", 200 + (i * 463) % 4301,
-                "Grocery purchase", b.at_day(d, 10 + slot * 4, (i * 13) % 60),
-            )  # fmt: skip
+                f"txn_dm_sale_{i}",
+                _shopper(i),
+                "ben_dmart_sales",
+                200 + (i * 463) % 4301,
+                "Grocery purchase",
+                b.at_day(d, 10 + slot * 4, (i * 13) % 60),
+            )
         if d % 7 == 0:
             b.txn(
-                f"txn_dm_bulk_{d // 7}", _shopper(d), "ben_dmart_sales", 50_000 + (d * 12_347) % 150_001,
-                "Bulk order", b.at_day(d, 12, 30),
-            )  # fmt: skip
+                f"txn_dm_bulk_{d // 7}",
+                _shopper(d),
+                "ben_dmart_sales",
+                50_000 + (d * 12_347) % 150_001,
+                "Bulk order",
+                b.at_day(d, 12, 30),
+            )
     for k in range(13):
         b.txn(
-            f"txn_dm_fmcg_{k + 1}", src, "ben_dm_fmcg", 350_000 + (k * 91_300) % 550_001,
-            "Weekly FMCG stock", b.at_day(2 + 7 * k, 10, 30),
-        )  # fmt: skip
+            f"txn_dm_fmcg_{k + 1}",
+            src,
+            "ben_dm_fmcg",
+            350_000 + (k * 91_300) % 550_001,
+            "Weekly FMCG stock",
+            b.at_day(2 + 7 * k, 10, 30),
+        )
     for k in range(26):
         b.txn(
-            f"txn_dm_produce_{k + 1}", src, "ben_dm_produce", 40_000 + (k * 17_900) % 80_001,
-            "Fresh produce", b.at_day(1 + 3 * k, 6, 15),
-        )  # fmt: skip
+            f"txn_dm_produce_{k + 1}",
+            src,
+            "ben_dm_produce",
+            40_000 + (k * 17_900) % 80_001,
+            "Fresh produce",
+            b.at_day(1 + 3 * k, 6, 15),
+        )
     for k in range(13):
         b.txn(
-            f"txn_dm_freight_{k + 1}", src, "ben_dm_freight", 25_000 + (k * 7_700) % 35_001,
-            "Freight and unloading", b.at_day(3 + 7 * k, 15),
-        )  # fmt: skip
+            f"txn_dm_freight_{k + 1}",
+            src,
+            "ben_dm_freight",
+            25_000 + (k * 7_700) % 35_001,
+            "Freight and unloading",
+            b.at_day(3 + 7 * k, 15),
+        )
     for m in range(3):
         day = 30 * m + 1
         b.txn(f"txn_dm_rent_{m + 1}", src, "ben_dm_realty", 450_000, "Store rent", b.at_day(day, 9))
-        b.txn(f"txn_dm_gst_{m + 1}", src, "ben_dm_gst", 680_000 + m * 42_500, "GST payment", b.at_day(day + 4, 11))
-        b.txn(f"txn_dm_payroll_{m + 1}", src, "ben_dm_payroll", 1_100_000 + m * 35_000, "Monthly salaries", b.at_day(day + 2, 17))
-        b.txn(f"txn_dm_power_{m + 1}", src, "ben_citypower", 118_000 + m * 6_400, "Electricity bill", b.at_day(day + 8, 12))  # fmt: skip
+        b.txn(
+            f"txn_dm_gst_{m + 1}",
+            src,
+            "ben_dm_gst",
+            680_000 + m * 42_500,
+            "GST payment",
+            b.at_day(day + 4, 11),
+        )
+        b.txn(
+            f"txn_dm_payroll_{m + 1}",
+            src,
+            "ben_dm_payroll",
+            1_100_000 + m * 35_000,
+            "Monthly salaries",
+            b.at_day(day + 2, 17),
+        )
+        b.txn(
+            f"txn_dm_power_{m + 1}",
+            src,
+            "ben_citypower",
+            118_000 + m * 6_400,
+            "Electricity bill",
+            b.at_day(day + 8, 12),
+        )
     for d in range(1, 61):
         b.txn(
-            f"txn_dm_tea_{d}", src, "ben_dm_tea", 150 + (d * 83) % 451,
-            "Staff tea and snacks", b.at_day(d, 16, 10),
-        )  # fmt: skip
+            f"txn_dm_tea_{d}",
+            src,
+            "ben_dm_tea",
+            150 + (d * 83) % 451,
+            "Staff tea and snacks",
+            b.at_day(d, 16, 10),
+        )
         if d % 2 == 0:
             b.txn(
-                f"txn_dm_clean_{d}", src, "ben_dm_clean", 500 + (d * 61) % 2001,
-                "Cleaning supplies", b.at_day(d, 8, 45),
-            )  # fmt: skip
+                f"txn_dm_clean_{d}",
+                src,
+                "ben_dm_clean",
+                500 + (d * 61) % 2001,
+                "Cleaning supplies",
+                b.at_day(d, 8, 45),
+            )
         if d % 3 == 0:
             b.txn(
-                f"txn_dm_pack_{d}", src, "ben_dm_pack", 800 + (d * 97) % 2701,
-                "Bags and packaging", b.at_day(d, 13, 20),
-            )  # fmt: skip
+                f"txn_dm_pack_{d}",
+                src,
+                "ben_dm_pack",
+                800 + (d * 97) % 2701,
+                "Bags and packaging",
+                b.at_day(d, 13, 20),
+            )
 
 
 def _forwarding_chain(b: _Builder) -> None:

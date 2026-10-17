@@ -97,6 +97,16 @@ def test_shop_holds_money_for_days_and_retains_it(graph_env: GraphEnv) -> None:
     assert shop.retention_ratio is not None and 0.45 <= shop.retention_ratio <= 0.7
 
 
+def test_restaurant_passes_funds_on_slowly_on_a_schedule(graph_env: GraphEnv) -> None:
+    g = graph_env.graph
+    flow = g.flow_profile("acct_spice_garden", 168, NOW)
+    assert flow.outflow_ratio is not None and flow.outflow_ratio >= 0.8
+    # Hours (3 to 12), versus minutes for the mule chain; the 5% carry-over stretches FIFO matching.
+    assert flow.median_dwell_minutes is not None and 180 <= flow.median_dwell_minutes <= 720
+    assert flow.regular_schedule
+    assert g.forwarding_chain("acct_spice_garden", 168, NOW).max_depth == 1
+
+
 def test_unknown_ids_are_not_found(graph_env: GraphEnv) -> None:
     g = graph_env.graph
     assert not g.get_node("nope").found

@@ -4,12 +4,12 @@ One slice at a time. A task is done only when its acceptance criteria pass and l
 
 ## 0. Contracts and repository setup
 
-- [ ] 0.1 Review and approve all specs; freeze graph schema, scenario ids, `AgentFinding`/`Evidence`/`Question`/`Answer`, `Assessment`/`Payment`, state machine, and API paths.
+- [x] 0.1 Review and approve all specs; freeze graph schema, scenario ids, `AgentFinding`/`Evidence`/`Question`/`Answer`, `Assessment`/`Payment`, state machine, and API paths.
 - [x] 0.2 Scaffold `services/backend` (Python 3.12 target; 3.14 locally, FastAPI, pydantic v2, pytest, ruff, mypy, `pyproject.toml`); health endpoint; config validation.
 - [x] 0.3 Add `infra/docker-compose.yml` (Neo4j 5, Firestore emulator), `firestore.rules` (deny all), `firestore.indexes.json`, `.env.example`; document how to start.
-- [ ] 0.4 Export the OpenAPI document and decide how Angular models are generated or mirrored.
+- [x] 0.4 Export the OpenAPI document and decide how Angular models are generated or mirrored.
 
-## 1. Slice 1 — Synthetic data and knowledge graph (current focus)
+## 1. Slice 1 — Synthetic data and knowledge graph
 
 Spec: `specs/knowledge-graph`.
 
@@ -19,7 +19,7 @@ Spec: `specs/knowledge-graph`.
 - [x] 1.4 Implement Neo4j constraints and the ingestion job (`MERGE`, idempotent); verify referential integrity.
 - [x] 1.5 Implement `GraphService` queries: `get_node`, `neighbors`, `transaction_neighborhood`, `account_age_days`, `recent_senders`, `flow_profile` (dwell, retention, velocity), `forwarding_chain` (parameterized).
 - [x] 1.6 Document setup, seeding, and sample queries in the README.
-- [ ] 1.7 Restore restaurant graph-flow coverage after reconciling fixture dwell time with its acceptance range.
+- [x] 1.7 Restore restaurant graph-flow coverage after reconciling fixture dwell time with its acceptance range.
 
 ## 2. Slice 2 — Backend foundation and access control
 
