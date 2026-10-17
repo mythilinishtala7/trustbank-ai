@@ -26,8 +26,7 @@ No agent is deployed as a separate service.
 - Target API region: `asia-southeast1`
 - Firebase Hosting site: `trustbank-pausepay`
 - Neo4j VM private address: `10.148.0.2:7687`
-- Existing `services/Dockerfile` is for superseded Node services. Build current backend from
-  `services/backend/Dockerfile`.
+- Build the backend from `services/backend/Dockerfile`.
 
 Do not store secrets in this repository, shell history, committed `.env` files, or Cloud Build
 substitutions. Commands below use Secret Manager references.

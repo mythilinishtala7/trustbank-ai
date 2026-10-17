@@ -152,5 +152,3 @@ curl localhost:8000/api/v1/health
   (`firebase deploy --only firestore --config infra/firebase.emulator.json`). The `transactions` composite index
   was created with gcloud and is READY.
 - Confirm policy defaults (weights 0.4/0.6, thresholds 30/60, 180 s hold).
-- Cloud Run to the VM Neo4j connectivity is task 7.2. The VM graph is not yet re-ingested with `account_number`.
-- Old TypeScript prototype (`apps/banking-web`, `services/fraud-api`, `services/agents`) stays until task 7.3.

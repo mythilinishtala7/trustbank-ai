@@ -83,16 +83,14 @@ Guidance for Copilot: `COPILOT_INSTRUCTIONS.md`.
 | Frontend | Angular |
 | Backend | Python, FastAPI |
 | Agents | Google ADK (Python) |
-| Model | Gemini via Vertex AI |
+| Model | Gemini (Gemini API key from Secret Manager; Vertex AI also supported) |
 | Graph | Neo4j |
 | System of record | Firestore |
 | Hosting | Cloud Run (API), Firebase Hosting (web) |
 
 ## Status
 
-The specification is complete and committed. Implementation starts with slice 1 (synthetic data and knowledge graph).
-
-`apps/banking-web` and `services/{fraud-api,agents}` are the earlier TypeScript prototype. They are kept as reference for fixture values and are removed once the Python backend reaches parity (task 7.3). Their old run instructions no longer apply.
+Implemented and deployed: backend (FastAPI, ADK agents, risk policy, payment lifecycle), customer app and investigation console. Live at https://trustbank-pausepay.web.app (API on Cloud Run, `asia-southeast1`). Remaining work is tracked in `openspec/changes/trustbank-agentic-fraud-prevention/tasks.md`. Run and deploy instructions: `services/backend/API_TESTING.md`, `infra/README.md`, `docs/deployment-runbook.md`.
 
 ## Guardrails
 
