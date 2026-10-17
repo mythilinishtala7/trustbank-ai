@@ -33,7 +33,7 @@
       </tbody>
     </table>
 
-    <ol class="events" aria-label="Trace events in order" aria-live="polite">
+    <ol class="events" tabindex="0" aria-label="Trace events in order" aria-live="polite">
       @for (e of ordered(); track e.seq) {
         <li class="ev" [attr.data-severity]="severity(e)" [attr.data-type]="e.type">
           <div class="head">

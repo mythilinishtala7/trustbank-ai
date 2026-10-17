@@ -54,6 +54,7 @@ p { margin: 0 0 8px; }
 .sim-badge { font-size: 12px; font-weight: 600; color: #7a611b; background: var(--gold-soft); border: 1px solid #e6d193; padding: 4px 12px; border-radius: 999px; }
 .link-btn { font: inherit; font-size: 14px; font-weight: 600; color: var(--blue); background: none; border: 0; padding: 4px 2px; cursor: pointer; }
 .link-btn:hover { text-decoration: underline; }
+@media (max-width: 640px) { .link-btn { min-height: 44px; padding: 4px 8px; } }
 
 main { padding: 28px 16px 56px; }
 .phone { max-width: 520px; margin: 0 auto; }

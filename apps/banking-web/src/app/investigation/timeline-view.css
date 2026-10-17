@@ -10,6 +10,7 @@ h2 { margin: 0; }
 .runs th, .runs td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); font-weight: 400; }
 .runs thead th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); font-weight: 600; }
 .runs tbody th { font-weight: 600; }
+@media (max-width: 640px) { .runs { font-size: 12px; } .runs th, .runs td { padding: 6px 4px; } .runs thead th { font-size: 10px; letter-spacing: 0; } }
 
 .events { list-style: none; margin: 0; padding: 0; max-height: 640px; overflow: auto; }
 .ev { border-left: 3px solid var(--line); padding: 6px 0 8px 12px; margin: 0 0 6px; font-size: 13px; }

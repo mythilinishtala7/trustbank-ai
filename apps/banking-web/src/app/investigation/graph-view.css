@@ -21,7 +21,7 @@ h2 { margin: 0 0 4px; }
 .entity-list summary { cursor: pointer; font-size: 13px; font-weight: 600; }
 .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; }
 .lists ul { list-style: none; margin: 6px 0; padding: 0; }
-.link { background: none; border: 0; padding: 2px 0; font: inherit; color: var(--blue, #2f5de1); cursor: pointer; text-align: left; }
+.link { background: none; border: 0; padding: 2px 0; min-height: 24px; font: inherit; color: var(--blue, #2f5de1); cursor: pointer; text-align: left; }
 .link[aria-pressed='true'] { font-weight: 700; text-decoration: underline; }
 .hl-tag { font-size: 10px; font-weight: 700; color: #2349b8; background: var(--blue-soft, #edf2fd); padding: 0 6px; border-radius: 999px; margin-left: 4px; }
 
@@ -39,6 +39,6 @@ code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
 .pts { font-size: 11px; font-weight: 700; color: var(--muted, #5d6b82); }
 
 @media (max-width: 1000px) {
-  .layout { grid-template-columns: 1fr; }
+  .layout { grid-template-columns: minmax(0, 1fr); }
   .canvas { height: 420px; }
 }
