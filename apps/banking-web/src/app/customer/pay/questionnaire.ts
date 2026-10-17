@@ -34,6 +34,9 @@ const MAX_QUESTIONS = 3;
   styles: `
     .counter { margin: 4px 0 0; text-align: right; }
     fieldset.card { margin-bottom: 12px; }
+    /* A floated legend sits inside the card padding instead of straddling the border. */
+    fieldset.card legend { float: left; width: 100%; margin: 0 0 14px; line-height: 1.35; }
+    fieldset.card legend + * { clear: both; }
     textarea { width: 100%; padding: 12px; font: inherit; border: 1px solid var(--line); border-radius: 12px; resize: vertical; color: var(--navy); }
     textarea:focus-visible { outline: 3px solid rgba(47, 93, 225, 0.35); outline-offset: 1px; border-color: var(--blue); }
   `,

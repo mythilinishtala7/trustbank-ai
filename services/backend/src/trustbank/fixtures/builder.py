@@ -133,8 +133,12 @@ def _shopper(i: int) -> str:
 
 
 def _people(b: _Builder) -> None:
-    b.customer("cust_asha", "Asha Menon", 84_250, 400, "asha.menon@trustpay", persona=True)
+    b.customer("cust_asha", "Asha Menon", 500_000, 400, "asha.menon@trustpay", persona=True)
     b.customer("cust_priya", "Priya Nair", 12_400, 120, "priya.nair@trustpay", persona=True)
+    b.customer(
+        "cust_dmart", "DMart Groceries Pvt Ltd", 2_500_458, 1_800, "dmart.groceries@trustpay",
+        persona=True,
+    )  # fmt: skip
     for i, name in enumerate(SHOPPER_NAMES, start=1):
         cid = f"cust_s{i:02d}"
         b.customer(cid, name, 0, 300, f"{cid[5:]}@trustpay")
@@ -154,6 +158,16 @@ def _people(b: _Builder) -> None:
         ("ben_heritage", "Heritage Jewellers", "heritage.jewellers@trustpay", 600),
         ("ben_spice_garden", "Spice Garden Restaurant", "spice.garden@trustpay", 500),
         ("ben_spice_owner", "Spice Garden (owner account)", "spice.owner@trustpay", 500),
+        ("ben_dmart_sales", "DMart Groceries Pvt Ltd (store sales)", "dmart.sales@trustpay", 1_800),
+        ("ben_dm_fmcg", "Sunrise FMCG Distributors", "sunrise.fmcg@trustpay", 1_500),
+        ("ben_dm_produce", "Fresh Farm Produce Co-op", "freshfarm.coop@trustpay", 1_400),
+        ("ben_dm_freight", "Metro Logistics & Freight", "metro.freight@trustpay", 1_200),
+        ("ben_dm_realty", "Orchid Realty (store lease)", "orchid.realty@trustpay", 1_700),
+        ("ben_dm_gst", "GST Payment Portal", "gst.portal@trustpay", 1_800),
+        ("ben_dm_payroll", "Staff Payroll Services", "staff.payroll@trustpay", 1_600),
+        ("ben_dm_pack", "PackWell Packaging Supplies", "packwell@trustpay", 900),
+        ("ben_dm_clean", "SparkClean Housekeeping", "sparkclean@trustpay", 800),
+        ("ben_dm_tea", "Raju Tea & Snacks", "raju.tea@trustpay", 700),
         ("ben_novatrade", "Nova Trade Desk", "nova.trade@trustpay", 3),
         ("ben_quickreturns", "Quick Returns Hub", "quick.returns@trustpay", 6),
         ("ben_taskrewards", "Task Rewards Desk", "task.rewards@trustpay", 11),
@@ -260,6 +274,59 @@ def _restaurant(b: _Builder) -> None:
     b.connect("conn_spice_owner", "ben_spice_garden", "ben_spice_owner", ConnectionKind.SAME_OWNER)
 
 
+def _dmart(b: _Builder) -> None:
+    """A business customer with big-ticket (suppliers, rent, tax, payroll) and small-ticket spend."""
+    src = "cust_dmart"
+    for d in range(1, 91):
+        for slot in range(3):
+            i = (d - 1) * 3 + slot + 1
+            b.txn(
+                f"txn_dm_sale_{i}", _shopper(i), "ben_dmart_sales", 200 + (i * 463) % 4301,
+                "Grocery purchase", b.at_day(d, 10 + slot * 4, (i * 13) % 60),
+            )  # fmt: skip
+        if d % 7 == 0:
+            b.txn(
+                f"txn_dm_bulk_{d // 7}", _shopper(d), "ben_dmart_sales", 50_000 + (d * 12_347) % 150_001,
+                "Bulk order", b.at_day(d, 12, 30),
+            )  # fmt: skip
+    for k in range(13):
+        b.txn(
+            f"txn_dm_fmcg_{k + 1}", src, "ben_dm_fmcg", 350_000 + (k * 91_300) % 550_001,
+            "Weekly FMCG stock", b.at_day(2 + 7 * k, 10, 30),
+        )  # fmt: skip
+    for k in range(26):
+        b.txn(
+            f"txn_dm_produce_{k + 1}", src, "ben_dm_produce", 40_000 + (k * 17_900) % 80_001,
+            "Fresh produce", b.at_day(1 + 3 * k, 6, 15),
+        )  # fmt: skip
+    for k in range(13):
+        b.txn(
+            f"txn_dm_freight_{k + 1}", src, "ben_dm_freight", 25_000 + (k * 7_700) % 35_001,
+            "Freight and unloading", b.at_day(3 + 7 * k, 15),
+        )  # fmt: skip
+    for m in range(3):
+        day = 30 * m + 1
+        b.txn(f"txn_dm_rent_{m + 1}", src, "ben_dm_realty", 450_000, "Store rent", b.at_day(day, 9))
+        b.txn(f"txn_dm_gst_{m + 1}", src, "ben_dm_gst", 680_000 + m * 42_500, "GST payment", b.at_day(day + 4, 11))
+        b.txn(f"txn_dm_payroll_{m + 1}", src, "ben_dm_payroll", 1_100_000 + m * 35_000, "Monthly salaries", b.at_day(day + 2, 17))
+        b.txn(f"txn_dm_power_{m + 1}", src, "ben_citypower", 118_000 + m * 6_400, "Electricity bill", b.at_day(day + 8, 12))  # fmt: skip
+    for d in range(1, 61):
+        b.txn(
+            f"txn_dm_tea_{d}", src, "ben_dm_tea", 150 + (d * 83) % 451,
+            "Staff tea and snacks", b.at_day(d, 16, 10),
+        )  # fmt: skip
+        if d % 2 == 0:
+            b.txn(
+                f"txn_dm_clean_{d}", src, "ben_dm_clean", 500 + (d * 61) % 2001,
+                "Cleaning supplies", b.at_day(d, 8, 45),
+            )  # fmt: skip
+        if d % 3 == 0:
+            b.txn(
+                f"txn_dm_pack_{d}", src, "ben_dm_pack", 800 + (d * 97) % 2701,
+                "Bags and packaging", b.at_day(d, 13, 20),
+            )  # fmt: skip
+
+
 def _forwarding_chain(b: _Builder) -> None:
     for k, (amount, hours) in enumerate(CHAIN_INBOUND, start=1):
         arrival = b.hours_ago(hours)
@@ -287,5 +354,6 @@ def build_dataset(now: datetime) -> Dataset:
     _sharma_store(b)
     _small_merchants(b)
     _restaurant(b)
+    _dmart(b)
     _forwarding_chain(b)
     return b.build()

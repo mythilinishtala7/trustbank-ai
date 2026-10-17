@@ -38,10 +38,10 @@ def test_requires_timezone_aware_clock() -> None:
 
 def test_counts_match_design() -> None:
     d = build_dataset(NOW)
-    assert len(d.customers) == 22
-    assert len(d.beneficiaries) == 15
-    assert len(d.accounts) == 37
-    assert len(d.transactions) == 279
+    assert len(d.customers) == 23
+    assert len(d.beneficiaries) == 25
+    assert len(d.accounts) == 48
+    assert len(d.transactions) == 735
     assert len(d.connections) == 2
 
 
