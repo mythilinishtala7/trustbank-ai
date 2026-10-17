@@ -154,3 +154,4 @@ curl -N $B/investigation/transactions/$ID/events -H "Authorization: Bearer $IT" 
 | `/health` shows `firestore: unavailable`, or 403 | ADC is the wrong account. Re-run `gcloud auth application-default login` as the owner. |
 | `/me` returns 503 mentioning an index | The `transactions` composite index is missing (it exists on the real project; create it on a new one). |
 | uv install fails with TLS errors | `unset SSL_CERT_FILE; UV_NATIVE_TLS=1 uv pip install ...` |
+| Questionnaire/explainer always fall back to templates; log shows `CERTIFICATE_VERIFY_FAILED` | `unset SSL_CERT_FILE` before starting uvicorn (a corporate CA file breaks public TLS) |

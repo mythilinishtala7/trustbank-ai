@@ -42,7 +42,7 @@ Spec: `agent-orchestration`.
 - [x] 3.5 Explainer agent (`LlmAgent`) with grounding validation and template fallback.
 - [x] 3.6 Orchestrator workflow (parallel detectors, conditional questionnaire), timeouts, failure and degraded handling.
 - [x] 3.7 Assessment record persistence (append-only) including tool-call trace.
-- [ ] 3.8 Live Gemini smoke test (manual) on Vertex AI.
+- [x] 3.8 Live Gemini smoke test (manual); run against the Gemini API with `gemini-3.8-flash` (Vertex AI API not enabled).
 
 ## 4. Slice 4 — Risk policy and payment lifecycle
 
@@ -74,13 +74,13 @@ Specs: `investigation-console`, `access-control`.
 - [x] 6.3 Console shell at `/investigation` with access-code gate and guard.
 - [x] 6.4 Transaction search, bounded Cytoscape graph with highlights, legend, node details.
 - [x] 6.5 Live agent timeline, evidence and policy panel with provenance badges.
-- [ ] 6.6 Verify access control manually (including that customer responses expose no internal fields).
+- [x] 6.6 Verify access control manually (including that customer responses expose no internal fields).
 
 ## 7. Slice 7 — Hardening and delivery
 
 Spec: `integration-testing`.
 
-- [ ] 7.1 Full scenario end-to-end run including model misbehavior cases and the "delay the forwarding transactions lowers the result" proof.
+- [x] 7.1 Full scenario end-to-end run including model misbehavior cases and the "delay the forwarding transactions lowers the result" proof.
 - [ ] 7.2 Container image and Cloud Run deployment; Secret Manager for credentials; Neo4j hosting decision documented.
 - [ ] 7.3 Remove the superseded TypeScript `services/fraud-api` and `services/agents` after parity; update README and demo script.
 - [ ] 7.4 Mobile/desktop visual pass and accessibility audit.
