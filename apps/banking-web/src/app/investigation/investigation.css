@@ -20,6 +20,7 @@
 .inv-shell input[type='text'], .inv-shell input[type='password'] { width: 100%; padding: 10px 12px; font: inherit; border: 1px solid var(--line, #e2e7ef); border-radius: 8px; background: var(--surface-raise, #f8fafd); color: inherit; }
 .inv-shell input:focus-visible, .inv-shell button:focus-visible, .inv-shell a:focus-visible, .inv-shell summary:focus-visible { outline: 3px solid #9db9f5; outline-offset: 1px; }
 .inv-btn { font: inherit; font-weight: 600; padding: 9px 16px; border: 1px solid var(--line, #e2e7ef); border-radius: 8px; background: var(--surface-raise, #f8fafd); color: var(--navy, #0b1f3a); cursor: pointer; }
+a.inv-btn { display: inline-block; text-decoration: none; }
 .inv-btn.primary { background: var(--blue, #2f5de1); border-color: var(--blue, #2f5de1); color: #fff; }
 .inv-btn.small { padding: 5px 12px; font-size: 13px; }
 @media (max-width: 640px) { .inv-btn.small { min-height: 44px; min-width: 44px; } }

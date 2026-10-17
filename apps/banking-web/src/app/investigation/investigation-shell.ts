@@ -13,6 +13,7 @@ import { InvestigatorSession } from './investigator-session';
         <a routerLink="/investigation" class="inv-brand">TrustBank <span>Investigation console</span></a>
         <span class="inv-sim" title="All entities, amounts and relationships are fictional">Simulated demo data</span>
         <span class="inv-spacer"></span>
+        <a class="inv-btn small" routerLink="/">User Login</a>
         @if (session.authenticated()) {
           <button type="button" class="inv-btn small" (click)="signOut()">Sign out</button>
         }

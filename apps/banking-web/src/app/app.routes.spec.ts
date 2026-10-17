@@ -16,7 +16,7 @@ describe('app routes', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  it('sends a signed-out visitor to the persona entry, with the simulated-demo badge and no console link', async () => {
+  it('sends a signed-out visitor to the persona entry, with the simulated-demo badge and the console link', async () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/');
     http.expectOne('/api/v1/personas').flush([]);
@@ -24,7 +24,7 @@ describe('app routes', () => {
     harness.fixture.detectChanges();
     const el = harness.routeNativeElement!.ownerDocument.body;
     expect(el.textContent).toContain('Simulated demo · no real money');
-    expect(el.querySelector('a[href*="investigation"]')).toBeNull();
+    expect(el.querySelector('a[href="/investigation"]')?.textContent).toContain('Investigation console');
   });
 
   it('shows home for a signed-in customer and keeps them off the entry screen', async () => {
