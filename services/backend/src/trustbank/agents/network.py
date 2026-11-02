@@ -18,7 +18,8 @@ from trustbank.domain import Provenance
 from trustbank.graph import GraphService
 from trustbank.graph.results import FlowProfile, ForwardingChains, NeighborsResult, SenderSummary
 
-LONG_WINDOW_HOURS = 168
+# Full history (~10 years): a recipient's past mule behaviour must still count, however old.
+LONG_WINDOW_HOURS = 24 * 365 * 10
 BURST_WINDOW_HOURS = 72
 MAX_GAP_MINUTES = 15
 MAX_HOPS = 3
@@ -78,7 +79,7 @@ def assess_network(
             Evidence(
                 id="network.rapid_pass_through",
                 summary=(
-                    f"{forwards} forwards in {LONG_WINDOW_HOURS} h; median dwell "
+                    f"{forwards} forwards in recorded history; median dwell "
                     f"{_minutes(flow_long.median_dwell_minutes)}, {retained:.0%} of inflow "
                     f"retained, {flow_long.distinct_destinations} destination(s)."
                 ),
